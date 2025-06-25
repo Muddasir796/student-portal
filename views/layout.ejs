@@ -1,9 +1,13 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSIS Student Portal</title>
+    
+    <%# SEO Tags %>
+    <title><%= locals.pageTitle || 'BSIS Student Portal' %> | Green International University</title>
+    <meta name="description" content="The official portal for students of the Bachelor of Science in Islamic Studies (BSIS) program at Green International University. Access your dashboard, timetable, assignments, and more.">
+    
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="font-sans" dir="ltr">
@@ -17,11 +21,11 @@
             <%- include('partials/navbar') %>
 
             <main id="main-content">
-                <%- body %> <!-- Yeh Jadoo hai! Page ka content yahan aayega -->
+                <%- body %>
             </main>
 
             <footer id="footer">
-                <!-- Footer content abhi bhi JS se aa raha hai, baad mein isay bhi yahan la sakte hain -->
+                <!-- Footer content abhi bhi JS se aa raha hai -->
             </footer>
 
         </div>

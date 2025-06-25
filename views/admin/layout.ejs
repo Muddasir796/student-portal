@@ -1,18 +1,20 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <%# Hum pageTitle ko dynamically set karenge %>
+    
+    <%# SEO Tags for Admin Panel %>
     <title><%= locals.pageTitle || 'Admin Panel' %> - BSIS Portal</title>
+    <%# Hum admin pages ko Google mein index hone se rokenge %>
+    <meta name="robots" content="noindex, nofollow">
+    
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        /* Admin-specific styles can go here */
+        /* Admin-specific styles */
         .admin-main {
             padding: 2rem;
         }
-
-        /* Nayi CSS: Admin ke sidebar mein scroll shamil karein */
         .sidebar .sidebar-nav {
             overflow-y: auto;
         }
@@ -22,16 +24,14 @@
 
     <div class="portal-layout">
 
-        <%# Admin ka alag sidebar yahan include hoga %>
         <%- include('./partials/sidebar') %>
 
         <div class="main-content-wrapper">
             
-            <%# Hum admin ke liye bhi public navbar istemal kar sakte hain %>
             <%- include('../partials/navbar') %>
 
             <main class="admin-main">
-                <%- body %> <!-- Page ka content yahan aayega -->
+                <%- body %>
             </main>
 
         </div>
