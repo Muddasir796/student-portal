@@ -1,4 +1,4 @@
-// public/js/main.js (Updated to pass language to server)
+// public/js/main.js (Updated with Mobile Menu Fix & Persistent Language)
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -21,7 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
             admin_nav: { adminTitle: "ایڈمن پینل", dashboard: "ڈیش بورڈ", manageStudents: "طلباء کا انتظام", manageTeachers: "اساتذہ کا انتظام", manageAssignments: "اسائنمنٹس کا انتظام", changePassword: "پاس ورڈ تبدیل کریں", logout: "لاگ آؤٹ" }
         }
     };
-
+    
+    // Icons (ab JS mein zaroori hain mobile menu ke liye)
+    const icons = {
+        home: `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+        directory: `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+        notes: `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+        // (Add other icons here if needed for mobile menu)
+    };
+    
     let currentLanguage = localStorage.getItem('preferredLanguage') || 'en';
 
     // =================================================================
@@ -34,32 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuContainer = document.getElementById('mobile-menu');
     const menuOpenIcon = document.getElementById('menu-open-icon');
     const menuCloseIcon = document.getElementById('menu-close-icon');
-    const adminSidebarNav = document.querySelector('.sidebar-nav'); // Admin sidebar nav
 
     // =================================================================
-    // HELPER FUNCTIONS
+    // UI & TEXT UPDATES
     // =================================================================
-    
-    // Naya Function: Tamam links ko language parameter ke sath update karein
-    const updateNavLinks = (lang) => {
-        const navContainers = [document.getElementById('sidebar-nav'), document.getElementById('mobile-menu')];
-        navContainers.forEach(container => {
-            if (container) {
-                const links = container.querySelectorAll('a');
-                links.forEach(link => {
-                    // Pehle se mojood URL ko parse karein
-                    const url = new URL(link.href, window.location.origin);
-                    if (lang === 'ur') {
-                        url.searchParams.set('lang', 'ur');
-                    } else {
-                        url.searchParams.delete('lang');
-                    }
-                    link.href = url.toString();
-                });
-            }
-        });
-    };
-
     const applyLanguage = () => {
         const lang = currentLanguage;
         const isUrdu = lang === 'ur';
@@ -76,23 +62,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // FIX: Mobile menu ke links banayein
+        if (mobileMenuContainer) {
+            const sidebarNav = document.getElementById('sidebar-nav');
+            if (sidebarNav) {
+                mobileMenuContainer.innerHTML = sidebarNav.innerHTML;
+            }
+        }
+
         if (langToggleDesktop) langToggleDesktop.textContent = siteData[lang].languageToggle;
         if (langToggleMobile) langToggleMobile.textContent = siteData[lang].languageToggle;
         
         const footer = document.getElementById('footer');
         if (footer) footer.innerHTML = `<p>&copy; ${new Date().getFullYear()} ${siteData[lang].universityName}. All Rights Reserved.</p>`;
-        
-        // Links ko bhi update karein
-        updateNavLinks(lang);
     };
 
-    // =================================================================
-    // EVENT HANDLERS
-    // =================================================================
     const toggleLanguage = () => {
         currentLanguage = currentLanguage === 'en' ? 'ur' : 'en';
         localStorage.setItem('preferredLanguage', currentLanguage);
         applyLanguage();
+        // Force a reload to apply server-side language changes correctly on all pages
+        window.location.reload();
     };
 
     if (langToggleDesktop) langToggleDesktop.addEventListener('click', toggleLanguage);
@@ -106,9 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =================================================================
-    // INITIALIZATION
-    // =================================================================
     const init = () => {
         applyLanguage();
     };
