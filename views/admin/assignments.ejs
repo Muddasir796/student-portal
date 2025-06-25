@@ -1,0 +1,80 @@
+<%# views/admin/assignments.ejs (Updated for dynamic language) %>
+
+<%
+// View ke andar hi translations define karein
+const translations = {
+    en: {
+        subject: 'Subject',
+        task: 'Task',
+        dueDate: 'Due Date',
+        status: 'Status',
+        actions: 'Actions',
+        completed: 'Completed',
+        pending: 'Pending'
+    },
+    ur: {
+        subject: 'مضمون',
+        task: 'کام',
+        dueDate: 'آخری تاریخ',
+        status: 'حیثیت',
+        actions: 'کاروائیاں',
+        completed: 'مکمل',
+        pending: 'زیر التواء'
+    }
+}
+%>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="page-title"><%= pageTitle %></h2>
+    <a href="/admin/assignments/add?lang=<%= lang %>" class="btn btn-primary">Add New Assignment</a>
+</div>
+
+<style>
+    .assignments-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .assignments-table th, .assignments-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
+    .assignments-table thead { background-color: #f9fafb; }
+    .assignments-table tbody tr:hover { background-color: #f9fafb; }
+    .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; text-transform: capitalize; }
+    .status-completed { background-color: #d1fae5; color: #065f46; }
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+</style>
+
+<div class="card" style="overflow-x: auto;">
+    <table class="assignments-table">
+        <thead>
+            <tr>
+                <th><%= translations[lang].subject %></th>
+                <th><%= translations[lang].task %></th>
+                <th><%= translations[lang].dueDate %></th>
+                <th><%= translations[lang].status %></th>
+                <th><%= translations[lang].actions %></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (locals.assignments && assignments.length > 0) { %>
+                <% assignments.forEach(assignment => { %>
+                    <tr>
+                        <td><%= assignment.subject[lang] %></td>
+                        <td><%= assignment.task[lang] %></td>
+                        <td><%= new Date(assignment.dueDate).toLocaleDateString() %></td>
+                        <td>
+                            <% if (assignment.completed) { %>
+                                <span class="status-badge status-completed"><%= translations[lang].completed %></span>
+                            <% } else { %>
+                                <span class="status-badge status-pending"><%= translations[lang].pending %></span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <a href="/admin/assignments/edit/<%= assignment._id %>?lang=<%= lang %>" class="btn" style="background-color: #e5e7eb; font-size: 0.875rem; padding: 0.25rem 0.5rem;">Edit</a>
+                            <a href="/admin/assignments/delete/<%= assignment._id %>?lang=<%= lang %>" class="btn btn-primary" style="background-color: #ef4444; font-size: 0.875rem; padding: 0.25rem 0.5rem;">Delete</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="padding: 1rem; text-align: center;">No assignments found.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

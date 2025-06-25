@@ -1,0 +1,61 @@
+<%# Yeh file views/downloads.ejs hai %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .downloads-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .download-item-card {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    @media (min-width: 640px) {
+        .download-item-card {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    .download-info h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--primary-green);
+    }
+    .download-info p {
+        color: #6b7280;
+        margin-top: 0.25rem;
+        max-width: 60ch;
+    }
+    .download-action .btn {
+        min-width: 120px;
+        text-align: center;
+    }
+</style>
+
+<div class="downloads-list">
+    <% if (locals.files && files.length > 0) { %>
+        <% files.forEach(file => { %>
+            <div class="card download-item-card">
+                <div class="download-info">
+                    <%# We will assume English for now %>
+                    <h3><%= file.title.en %></h3>
+                    <p><%= file.description.en %></p>
+                </div>
+                <div class="download-action">
+                    <a href="<%= file.url %>" class="btn btn-primary" download>Download</a>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="card">
+            <p>No downloadable files available at the moment.</p>
+        </div>
+    <% } %>
+</div>

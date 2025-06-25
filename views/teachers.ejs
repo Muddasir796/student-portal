@@ -1,0 +1,40 @@
+ <%# views/admin/teachers.ejs (Updated for dynamic language) %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="page-title"><%= pageTitle %></h2>
+    <%# Link ke sath language parameter bhejein %>
+    <a href="/admin/teachers/add?lang=<%= lang %>" class="btn btn-primary">Add New Teacher</a>
+</div>
+
+<div class="card" style="overflow-x: auto;">
+    <table class="table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Name</th>
+                <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Subject</th>
+                <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Office Hours</th>
+                <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (locals.teachers && teachers.length > 0) { %>
+                <% teachers.forEach(teacher => { %>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <%# FIX: Ab hum 'lang' variable ka istemal kar ke sahi zabaan ka text dikhayenge %>
+                        <td style="padding: 0.75rem;"><%= teacher.name[lang] %></td>
+                        <td style="padding: 0.75rem;"><%= teacher.subject[lang] %></td>
+                        <td style="padding: 0.75rem;"><%= teacher.officeHours[lang] %></td>
+                        <td style="padding: 0.75rem;">
+                            <a href="/admin/teachers/edit/<%= teacher._id %>?lang=<%= lang %>" class="btn" style="background-color: #e5e7eb; font-size: 0.875rem; padding: 0.25rem 0.5rem;">Edit</a>
+                            <a href="/admin/teachers/delete/<%= teacher._id %>?lang=<%= lang %>" class="btn btn-primary" style="background-color: #ef4444; font-size: 0.875rem; padding: 0.25rem 0.5rem;">Delete</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" style="padding: 1rem; text-align: center;">No teachers found.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,182 @@
+<%# Yeh file views/quiz.ejs hai %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .quiz-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .quiz-card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+    #quiz-start-screen, #quiz-results-screen {
+        text-align: center;
+    }
+    #quiz-start-screen h3 {
+        font-size: 1.5rem;
+        color: var(--primary-green);
+        margin-bottom: 1.5rem;
+    }
+    .quiz-question p {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .quiz-option-btn {
+        width: 100%;
+        padding: 1rem;
+        text-align: left;
+        background-color: #f3f4f6;
+        border: 2px solid transparent;
+    }
+    .quiz-option-btn:hover {
+        border-color: var(--primary-gold);
+    }
+    .quiz-option-btn.selected {
+        background-color: var(--primary-gold);
+        color: white;
+        border-color: var(--primary-green);
+    }
+</style>
+
+<div class="quiz-wrapper">
+    <div class="quiz-card">
+        <!-- Start Screen -->
+        <div id="quiz-start-screen">
+            <h3>Test Your Knowledge!</h3>
+            <button id="start-quiz-btn" class="btn btn-primary">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen (Initially Hidden) -->
+        <div id="quiz-question-screen" style="display: none;">
+            <div class="quiz-question">
+                <p id="question-text"></p>
+            </div>
+            <div id="quiz-options" class="quiz-options">
+                <%# Options will be added here by JS %>
+            </div>
+            <button id="next-question-btn" class="btn btn-primary" style="width: 100%; margin-top: 2rem;">Next Question</button>
+        </div>
+
+        <!-- Results Screen (Initially Hidden) -->
+        <div id="quiz-results-screen" style="display: none;">
+            <h3>Quiz Completed!</h3>
+            <p style="font-size: 1.25rem; margin: 1rem 0;">Your Score: <span id="score-text" style="font-weight: bold; color: var(--primary-green);"></span></p>
+            <button id="try-again-btn" class="btn btn-primary">Try Again</button>
+        </div>
+    </div>
+</div>
+
+<%# FIX: Data ko ek alag, non-executable script tag mein daalein. Yeh sab se mehfooz tareeka hai. %>
+<script id="quiz-data-container" type="application/json">
+    <%- JSON.stringify(quiz) %>
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const startScreen = document.getElementById('quiz-start-screen');
+    const questionScreen = document.getElementById('quiz-question-screen');
+    const resultsScreen = document.getElementById('quiz-results-screen');
+    const startBtn = document.getElementById('start-quiz-btn');
+    const nextBtn = document.getElementById('next-question-btn');
+    const tryAgainBtn = document.getElementById('try-again-btn');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('quiz-options');
+    const scoreText = document.getElementById('score-text');
+
+    // Quiz Data
+    // FIX: Data ko JSON script tag se parhein aur parse karein.
+    const quizDataElement = document.getElementById('quiz-data-container');
+    const quizDataFromServer = JSON.parse(quizDataElement.textContent.trim());
+    const quizData = quizDataFromServer.en; // Using English questions for now
+
+    // State
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        startScreen.style.display = 'none';
+        resultsScreen.style.display = 'none';
+        questionScreen.style.display = 'block';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const question = quizData[currentQuestionIndex];
+        questionText.textContent = `${currentQuestionIndex + 1}. ${question.question}`;
+        
+        optionsContainer.innerHTML = ''; // Clear old options
+        question.options.forEach(option => {
+            const button = document.createElement('button');
+            button.className = 'btn quiz-option-btn';
+            button.textContent = option;
+            button.onclick = () => handleOptionSelect(button, option, question.answer);
+            optionsContainer.appendChild(button);
+        });
+        nextBtn.style.display = 'none'; // Hide next button until an answer is selected
+    }
+
+    function handleOptionSelect(button, selectedOption, correctAnswer) {
+        // Disable all option buttons after one is clicked
+        Array.from(optionsContainer.children).forEach(btn => {
+            btn.disabled = true;
+            // Highlight correct answer
+            if (btn.textContent === correctAnswer) {
+                btn.style.borderColor = 'var(--primary-green)';
+            }
+        });
+
+        // Check if selected answer is correct
+        if (selectedOption === correctAnswer) {
+            score++;
+            button.style.backgroundColor = 'var(--primary-green)';
+            button.style.color = 'white';
+        } else {
+            button.style.backgroundColor = '#ef4444'; // Red for wrong answer
+            button.style.color = 'white';
+        }
+
+        // Show Next/Finish button
+        if (currentQuestionIndex < quizData.length - 1) {
+            nextBtn.textContent = 'Next Question';
+        } else {
+            nextBtn.textContent = 'Finish Quiz';
+        }
+        nextBtn.style.display = 'block';
+    }
+
+    function handleNextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            showQuestion();
+        } else {
+            showResults();
+        }
+    }
+    
+    function showResults() {
+        questionScreen.style.display = 'none';
+        resultsScreen.style.display = 'block';
+        scoreText.textContent = `${score} out of ${quizData.length}`;
+    }
+
+    // Event Listeners
+    startBtn.addEventListener('click', startQuiz);
+    nextBtn.addEventListener('click', handleNextQuestion);
+    tryAgainBtn.addEventListener('click', startQuiz);
+});
+</script>

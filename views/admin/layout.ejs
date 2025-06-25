@@ -1,0 +1,44 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%# Hum pageTitle ko dynamically set karenge %>
+    <title><%= locals.pageTitle || 'Admin Panel' %> - BSIS Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Admin-specific styles can go here */
+        .admin-main {
+            padding: 2rem;
+        }
+
+        /* Nayi CSS: Admin ke sidebar mein scroll shamil karein */
+        .sidebar .sidebar-nav {
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="font-sans" dir="ltr">
+
+    <div class="portal-layout">
+
+        <%# Admin ka alag sidebar yahan include hoga %>
+        <%- include('./partials/sidebar') %>
+
+        <div class="main-content-wrapper">
+            
+            <%# Hum admin ke liye bhi public navbar istemal kar sakte hain %>
+            <%- include('../partials/navbar') %>
+
+            <main class="admin-main">
+                <%- body %> <!-- Page ka content yahan aayega -->
+            </main>
+
+        </div>
+
+    </div>
+
+    <script src="/js/main.js"></script>
+
+</body>
+</html>

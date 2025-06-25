@@ -1,0 +1,98 @@
+<%# Yeh file views/feedback.ejs hai (Final version with API call) %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .feedback-container { max-width: 800px; margin: 0 auto; }
+    .feedback-form .form-group { margin-bottom: 1.5rem; }
+    .feedback-form label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+    .feedback-form textarea { min-height: 150px; resize: vertical; }
+    .feedback-description { margin-bottom: 1.5rem; color: #6b7280; text-align: center; background-color: #f9fafb; padding: 1rem; border-radius: 0.5rem; }
+    #feedback-response-msg {
+        display: none; /* Initially hidden */
+        text-align: center;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    #feedback-response-msg.success {
+        color: var(--primary-green);
+        background-color: #d1fae5;
+    }
+    #feedback-response-msg.error {
+        color: #991b1b; /* Red */
+        background-color: #fee2e2;
+    }
+</style>
+
+<div class="feedback-container card">
+    <p class="feedback-description">
+        Your feedback is valuable for the improvement of this portal. All submissions are anonymous.
+    </p>
+
+    <div id="feedback-response-msg">
+        <%# Response message will be shown here %>
+    </div>
+
+    <form id="feedback-form" class="feedback-form">
+        <div class="form-group">
+            <label for="feedback-message">Your Message:</label>
+            <textarea id="feedback-message" class="form-input" placeholder="Please type your suggestions or report any issues here..." required minlength="10"></textarea>
+        </div>
+        <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%;">Submit Feedback</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const feedbackForm = document.getElementById('feedback-form');
+        const responseMsg = document.getElementById('feedback-response-msg');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if(feedbackForm) {
+            feedbackForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); 
+                
+                const message = document.getElementById('feedback-message').value;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                try {
+                    // Fetch API ka istemal kar ke data server ko bhejein
+                    const response = await fetch('/api/feedback', {
+                        method: 'POST', // Hum data bhej rahe hain
+                        headers: {
+                            'Content-Type': 'application/json' // Hum JSON format mein data bhej rahe hain
+                        },
+                        body: JSON.stringify({ message: message }) // Data ko JSON string mein convert karein
+                    });
+
+                    const result = await response.json(); // Server ka jawab hasil karein
+
+                    if (result.success) {
+                        // Agar kamyab ho
+                        feedbackForm.style.display = 'none';
+                        responseMsg.textContent = result.message;
+                        responseMsg.className = 'success';
+                        responseMsg.style.display = 'block';
+                    } else {
+                        // Agar server se error aaye
+                        throw new Error(result.message || 'An unknown error occurred.');
+                    }
+
+                } catch (error) {
+                    // Agar network ya koi aur error aaye
+                    console.error('Feedback submission failed:', error);
+                    responseMsg.textContent = `Error: ${error.message}`;
+                    responseMsg.className = 'error';
+                    responseMsg.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Feedback';
+                }
+            });
+        }
+    });
+</script>

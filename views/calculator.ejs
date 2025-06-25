@@ -1,0 +1,149 @@
+<%# Yeh file views/calculator.ejs hai %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .calculator-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .gpa-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--primary-green);
+    }
+    .courses-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .course-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    @media (min-width: 768px) {
+        .course-row {
+            grid-template-columns: 3fr 1fr 1fr;
+            align-items: center;
+        }
+    }
+    .result-box {
+        margin-top: 1.5rem;
+        text-align: center;
+        background: #f0fdf4;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        display: none; /* Initially hidden */
+    }
+    .result-box p {
+        font-size: 1.125rem;
+    }
+    .result-box .gpa-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-green);
+        display: block;
+        margin-top: 0.5rem;
+    }
+</style>
+
+<div class="calculator-container">
+    <div class="card gpa-card">
+        <h3>Semester GPA Calculator</h3>
+        <div id="courses-container" class="courses-container">
+            <%# Course rows will be added by JS %>
+        </div>
+        <div style="display:flex; gap: 1rem; margin-bottom: 1rem;">
+            <button id="add-course-btn" class="btn" style="background-color: #e5e7eb;">Add Course</button>
+        </div>
+        <button id="calculate-gpa-btn" class="btn btn-primary" style="width: 100%;">Calculate GPA</button>
+        <div id="gpa-result-box" class="result-box">
+            <p>Your Semester GPA is:</p>
+            <span id="gpa-value" class="gpa-value">0.00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const coursesContainer = document.getElementById('courses-container');
+    const addCourseBtn = document.getElementById('add-course-btn');
+    const calculateGpaBtn = document.getElementById('calculate-gpa-btn');
+    const gpaResultBox = document.getElementById('gpa-result-box');
+    const gpaValue = document.getElementById('gpa-value');
+
+    const gradePoints = { 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0 };
+    const creditHoursOptions = [1, 2, 3, 4];
+
+    function createCourseRow() {
+        const row = document.createElement('div');
+        row.className = 'course-row';
+
+        // Course Name Input
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Course Name (e.g., Islamic Studies)';
+        nameInput.className = 'form-input gpa-course-name';
+
+        // Credit Hours Select
+        const creditSelect = document.createElement('select');
+        creditSelect.className = 'form-select gpa-course-credits';
+        creditHoursOptions.forEach(h => {
+            const option = document.createElement('option');
+            option.value = h;
+            option.textContent = `${h} Credit Hour(s)`;
+            creditSelect.appendChild(option);
+        });
+
+        // Grade Select
+        const gradeSelect = document.createElement('select');
+        gradeSelect.className = 'form-select gpa-course-grade';
+        Object.keys(gradePoints).forEach(g => {
+            const option = document.createElement('option');
+            option.value = g;
+            option.textContent = `Grade ${g}`;
+            gradeSelect.appendChild(option);
+        });
+
+        row.appendChild(nameInput);
+        row.appendChild(creditSelect);
+        row.appendChild(gradeSelect);
+        coursesContainer.appendChild(row);
+    }
+
+    function calculateGpa() {
+        let totalPoints = 0;
+        let totalCredits = 0;
+        
+        const courseRows = document.querySelectorAll('.course-row');
+        courseRows.forEach(row => {
+            const credits = parseFloat(row.querySelector('.gpa-course-credits').value);
+            const grade = row.querySelector('.gpa-course-grade').value;
+            
+            if (!isNaN(credits) && grade) {
+                totalPoints += credits * gradePoints[grade];
+                totalCredits += credits;
+            }
+        });
+        
+        const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
+        gpaValue.textContent = gpa;
+        gpaResultBox.style.display = 'block';
+    }
+
+    // Event Listeners
+    addCourseBtn.addEventListener('click', createCourseRow);
+    calculateGpaBtn.addEventListener('click', calculateGpa);
+
+    // Initial state
+    createCourseRow(); // Add one course row to start with
+});
+</script>

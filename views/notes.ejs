@@ -1,0 +1,126 @@
+<%# Yeh file views/notes.ejs hai %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .notes-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .subject-selector-card {
+        padding: 1rem;
+    }
+    .subject-selector label {
+        font-weight: 500;
+        margin-right: 1rem;
+    }
+    .notes-list {
+        list-style: none;
+        padding: 0;
+    }
+    .note-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s ease;
+    }
+    .note-item:last-child {
+        border-bottom: none;
+    }
+    .note-item:hover {
+        background-color: #f9fafb;
+    }
+    .note-title {
+        font-weight: 500;
+    }
+    .note-date {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    .download-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+<div class="notes-container">
+    <div class="card subject-selector-card">
+        <div class="subject-selector">
+            <label for="subject-select">Select a Subject:</label>
+            <select id="subject-select" class="form-select" style="display: inline-block; width: auto;">
+                <option value="">-- Please choose an option --</option>
+                <%# Get all subject keys from the data and create options %>
+                <% Object.keys(subjects).forEach(key => { %>
+                    <option value="<%= key %>"><%= subjects[key].subject.en %></option>
+                <% }); %>
+            </select>
+        </div>
+    </div>
+
+    <div class="card" id="notes-list-container" style="display: none;">
+        <h3 id="notes-subject-title" class="widget-title"></h3>
+        <ul id="notes-list" class="notes-list">
+            <%# Notes will be populated here by JavaScript %>
+        </ul>
+    </div>
+</div>
+
+<%# Data ko ek alag, non-executable script tag mein daal dein taake syntax error na aaye %>
+<script id="subjects-json-data" type="application/json">
+    <%- JSON.stringify(subjects) %>
+</script>
+
+<%# This page requires some client-side JavaScript to function %>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const subjectSelect = document.getElementById('subject-select');
+        const notesListContainer = document.getElementById('notes-list-container');
+        const notesSubjectTitle = document.getElementById('notes-subject-title');
+        const notesList = document.getElementById('notes-list');
+
+        // Data ko JSON script tag se parh kar parse karein
+        const subjectsJSON = document.getElementById('subjects-json-data').textContent;
+        const subjectsData = JSON.parse(subjectsJSON);
+
+        subjectSelect.addEventListener('change', (e) => {
+            const selectedSubjectKey = e.target.value;
+            
+            if (!selectedSubjectKey) {
+                notesListContainer.style.display = 'none';
+                return;
+            }
+
+            const selectedSubject = subjectsData[selectedSubjectKey];
+            notesSubjectTitle.textContent = selectedSubject.subject.en;
+            
+            // Clear previous notes
+            notesList.innerHTML = '';
+
+            // Populate new notes
+            if (selectedSubject.notes && selectedSubject.notes.length > 0) {
+                 selectedSubject.notes.forEach(note => {
+                    const li = document.createElement('li');
+                    li.className = 'note-item';
+                    li.innerHTML = `
+                        <div>
+                            <p class="note-title">${note.title.en}</p>
+                            <p class="note-date">Uploaded on: ${note.date}</p>
+                        </div>
+                        <a href="${note.url}" class="btn btn-primary download-btn" download>Download</a>
+                    `;
+                    notesList.appendChild(li);
+                });
+            } else {
+                notesList.innerHTML = '<p>No notes available for this subject.</p>';
+            }
+
+            notesListContainer.style.display = 'block';
+        });
+    });
+</script>

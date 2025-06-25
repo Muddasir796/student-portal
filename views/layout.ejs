@@ -1,0 +1,34 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSIS Student Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="font-sans" dir="ltr">
+
+    <div class="portal-layout">
+
+        <%- include('partials/sidebar') %>
+
+        <div class="main-content-wrapper">
+            
+            <%- include('partials/navbar') %>
+
+            <main id="main-content">
+                <%- body %> <!-- Yeh Jadoo hai! Page ka content yahan aayega -->
+            </main>
+
+            <footer id="footer">
+                <!-- Footer content abhi bhi JS se aa raha hai, baad mein isay bhi yahan la sakte hain -->
+            </footer>
+
+        </div>
+
+    </div>
+
+    <script src="/js/main.js"></script>
+
+</body>
+</html>

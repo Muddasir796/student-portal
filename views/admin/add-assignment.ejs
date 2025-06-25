@@ -1,0 +1,49 @@
+<%# views/admin/add-assignment.ejs %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<% if (locals.error) { %>
+    <div class="error-message" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+        <%= error %>
+    </div>
+<% } %>
+
+<div class="card">
+    <form action="/admin/assignments/add" method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="subject_en" style="display: block; margin-bottom: 0.5rem;">Subject (English)</label>
+                <input type="text" name="subject_en" id="subject_en" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="subject_ur" style="display: block; margin-bottom: 0.5rem;">Subject (Urdu)</label>
+                <input type="text" name="subject_ur" id="subject_ur" class="form-input" dir="rtl" required>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="task_en" style="display: block; margin-bottom: 0.5rem;">Task (English)</label>
+                <textarea name="task_en" id="task_en" class="form-input" rows="3" required></textarea>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="task_ur" style="display: block; margin-bottom: 0.5rem;">Task (Urdu)</label>
+                <textarea name="task_ur" id="task_ur" class="form-input" dir="rtl" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="dueDate" style="display: block; margin-bottom: 0.5rem;">Due Date</label>
+                <input type="date" name="dueDate" id="dueDate" class="form-input" required>
+            </div>
+            <div class="form-group" style="align-self: center;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" name="completed" value="true" style="width: 1rem; height: 1rem;">
+                    <span>Is this assignment completed?</span>
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">Add Assignment</button>
+            <a href="/admin/assignments" class="btn" style="background-color: #e5e7eb;">Cancel</a>
+        </div>
+    </form>
+</div>

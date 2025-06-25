@@ -1,0 +1,33 @@
+<%# Yeh file views/timetable.ejs hai %>
+
+<%# Hum 'en' language ka data istemal kar rahe hain. Baad mein isay dynamic banaya ja sakta hai. %>
+<% const lang = 'en'; %>
+<% const timetable = data[lang]; %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= timetable.title %></h2>
+</div>
+
+<div class="card timetable-container">
+    <table class="timetable">
+        <thead>
+            <tr>
+                <%# Loop through the headers array to create table headers %>
+                <% timetable.headers.forEach(header => { %>
+                    <th><%= header %></th>
+                <% }); %>
+            </tr>
+        </thead>
+        <tbody>
+            <%# Loop through the rows array to create table rows %>
+            <% timetable.rows.forEach(row => { %>
+                <tr>
+                    <%# Loop through each cell in the row %>
+                    <% row.forEach(cell => { %>
+                        <td><%= cell %></td>
+                    <% }); %>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>

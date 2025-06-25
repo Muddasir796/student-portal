@@ -1,0 +1,74 @@
+<%# Yeh file views/assignments.ejs hai %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<style>
+    .assignments-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .assignments-table th, .assignments-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .assignments-table thead {
+        background-color: #f9fafb;
+    }
+    .assignments-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    .status-completed {
+        background-color: #d1fae5; /* Green */
+        color: #065f46;
+    }
+    .status-pending {
+        background-color: #fef3c7; /* Yellow */
+        color: #92400e;
+    }
+</style>
+
+<div class="card" style="overflow-x: auto;">
+    <table class="assignments-table">
+        <thead>
+            <tr>
+                <%# We will assume English for now. This can be made dynamic later. %>
+                <th>Subject</th>
+                <th>Task</th>
+                <th>Due Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (locals.assignments && assignments.length > 0) { %>
+                <% assignments.forEach(assignment => { %>
+                    <tr>
+                        <td><%= assignment.subject.en %></td>
+                        <td><%= assignment.task.en %></td>
+                        <td><%= assignment.dueDate %></td>
+                        <td>
+                            <% if (assignment.completed) { %>
+                                <span class="status-badge status-completed">Completed</span>
+                            <% } else { %>
+                                <span class="status-badge status-pending">Pending</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem;">No assignments found.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
