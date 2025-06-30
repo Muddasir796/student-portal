@@ -1,52 +1,54 @@
-<%# views/admin/add-teacher.ejs %>
+<h2 class="mb-4"><%= title %></h2>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
+<form action="/admin/teachers/add" method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-<% if (locals.error) { %>
-    <div class="error-message" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        <%= error %>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="name" class="form-label">Teacher Name</label>
+            <input type="text" class="form-control <%= errors.name ? 'is-invalid' : '' %>" id="name" name="name" value="<%= oldInput.name || '' %>" required>
+            <% if (errors.name) { %>
+                <div class="invalid-feedback"><%= errors.name %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="designation" class="form-label">Designation (e.g., Professor, Lecturer)</label>
+            <input type="text" class="form-control <%= errors.designation ? 'is-invalid' : '' %>" id="designation" name="designation" value="<%= oldInput.designation || '' %>" required>
+            <% if (errors.designation) { %>
+                <div class="invalid-feedback"><%= errors.designation %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" class="form-control <%= errors.subject ? 'is-invalid' : '' %>" id="subject" name="subject" value="<%= oldInput.subject || '' %>" required>
+            <% if (errors.subject) { %>
+                <div class="invalid-feedback"><%= errors.subject %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="contact" class="form-label">Contact Number (Optional)</label>
+            <input type="text" class="form-control <%= errors.contact ? 'is-invalid' : '' %>" id="contact" name="contact" value="<%= oldInput.contact || '' %>">
+            <% if (errors.contact) { %>
+                <div class="invalid-feedback"><%= errors.contact %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label for="profileImage" class="form-label">Profile Picture</label>
+            <input 
+                class="form-control <%= errors.profileImage ? 'is-invalid' : '' %>" 
+                type="file" 
+                id="profileImage" 
+                name="profileImage">
+            <% if (errors.profileImage) { %>
+                <div class="invalid-feedback"><%= errors.profileImage %></div>
+            <% } %>
+        </div>
     </div>
-<% } %>
 
-<div class="card">
-    <form action="/admin/teachers/add" method="POST">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-                <label for="name_en" style="display: block; margin-bottom: 0.5rem;">Teacher Name (English)</label>
-                <input type="text" name="name_en" id="name_en" class="form-input" required>
-            </div>
-            <div class="form-group">
-                <label for="name_ur" style="display: block; margin-bottom: 0.5rem;">Teacher Name (Urdu)</label>
-                <input type="text" name="name_ur" id="name_ur" class="form-input" dir="rtl" required>
-            </div>
-            <div class="form-group">
-                <label for="subject_en" style="display: block; margin-bottom: 0.5rem;">Subject (English)</label>
-                <input type="text" name="subject_en" id="subject_en" class="form-input" required>
-            </div>
-            <div class="form-group">
-                <label for="subject_ur" style="display: block; margin-bottom: 0.5rem;">Subject (Urdu)</label>
-                <input type="text" name="subject_ur" id="subject_ur" class="form-input" dir="rtl" required>
-            </div>
-             <div class="form-group">
-                <label for="officeHours_en" style="display: block; margin-bottom: 0.5rem;">Office Hours (English)</label>
-                <input type="text" name="officeHours_en" id="officeHours_en" class="form-input" placeholder="e.g., Mon, Wed (10-12 PM)" required>
-            </div>
-            <div class="form-group">
-                <label for="officeHours_ur" style="display: block; margin-bottom: 0.5rem;">Office Hours (Urdu)</label>
-                <input type="text" name="officeHours_ur" id="officeHours_ur" class="form-input" dir="rtl" placeholder="مثلاً پیر، بدھ (صبح ۱۰-۱۲)" required>
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 1.5rem;">
-            <label for="photo" style="display: block; margin-bottom: 0.5rem;">Photo URL (Optional)</label>
-            <input type="text" name="photo" id="photo" class="form-input">
-        </div>
-
-        <div style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">Add Teacher</button>
-            <a href="/admin/teachers" class="btn" style="background-color: #e5e7eb;">Cancel</a>
-        </div>
-    </form>
-</div>
+    <button type="submit" class="btn btn-success px-4">Add Teacher</button>
+    <a href="/admin/teachers" class="btn btn-secondary">Cancel</a>
+</form>

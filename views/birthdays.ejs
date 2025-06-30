@@ -1,113 +1,34 @@
-<%# Yeh file views/birthdays.ejs hai (Corrected Version) %>
-
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
-
-<style>
-    .birthdays-container {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    .birthday-section h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-gold);
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--primary-green);
-    }
-    .birthday-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1.5rem;
-    }
-    .birthday-card {
-        background-color: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-        text-align: center;
-        padding: 1.5rem;
-    }
-    .birthday-card img {
-        width: 96px;
-        height: 96px;
-        border-radius: 50%;
-        margin: 0 auto 1rem;
-        border: 4px solid var(--primary-green);
-    }
-    .birthday-card .name {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--primary-green);
-    }
-    .birthday-card .date {
-        color: #6b7280;
-    }
-    .no-birthdays {
-        background-color: #f9fafb;
-        padding: 2rem;
-        text-align: center;
-        color: #6b7280;
-        border-radius: 0.5rem;
-    }
-</style>
-
-<%
-    // --- Birthday Logic (Corrected for Date Objects) ---
-    const today = new Date();
-    const todays_month = today.getMonth(); // 0-11
-    const todays_date = today.getDate();
-    const current_month_index = today.getMonth(); // 0-11
-
-    const todaysBirthdays = students.filter(student => {
-        const studentBirthday = new Date(student.birthday);
-        return studentBirthday.getMonth() === todays_month && studentBirthday.getDate() === todays_date;
-    });
-
-    const upcomingBirthdays = students.filter(student => {
-        const studentBirthday = new Date(student.birthday);
-        // Check if it's in the same month but not today
-        return studentBirthday.getMonth() === current_month_index && studentBirthday.getDate() !== todays_date;
-    });
-%>
-
-<div class="birthdays-container">
-    <div class="birthday-section">
-        <h3>Today's Birthdays!</h3>
-        <% if (todaysBirthdays.length > 0) { %>
-            <div class="birthday-grid">
-                <% todaysBirthdays.forEach(student => { %>
-                    <div class="birthday-card">
-                        <img src="<%= student.photo %>" alt="<%= student.name %>">
-                        <p class="name"><%= student.name %></p>
-                        <p class="date"><%= new Date(student.birthday).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) %></p>
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <div class="no-birthdays">
-                <p>No birthdays today.</p>
-            </div>
-        <% } %>
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Today's Birthdays</h1>
+        <p class="lead text-muted">Join us in wishing a very happy birthday to the following students!</p>
     </div>
 
-    <div class="birthday-section">
-        <h3>Upcoming This Month</h3>
-         <% if (upcomingBirthdays.length > 0) { %>
-            <div class="birthday-grid">
-                <% upcomingBirthdays.forEach(student => { %>
-                    <div class="birthday-card">
-                        <img src="<%= student.photo %>" alt="<%= student.name %>">
-                        <p class="name"><%= student.name %></p>
-                        <p class="date"><%= new Date(student.birthday).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) %></p>
+    <div class="row justify-content-center">
+        <% if(students.length > 0) { %>
+            <% students.forEach(student => { %>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 text-center shadow-sm border-0">
+                        <div class="card-img-top-container">
+                            <img src="<%= student.profileImage %>" class="card-img-top" alt="<%= student.name %>" style="width: 100%; height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1"><%= student.name %></h5>
+                            <p class="card-text text-muted mb-2"><%= student.class %></p>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <i class="bi bi-gift-fill text-danger"></i>
+                            <small class="text-muted"> Happy Birthday! </small>
+                            <i class="bi bi-gift-fill text-danger"></i>
+                        </div>
                     </div>
-                <% }) %>
-            </div>
+                </div>
+            <% }); %>
         <% } else { %>
-            <div class="no-birthdays">
-                <p>No other birthdays this month.</p>
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <p class="mb-0">There are no student birthdays today.</p>
+                </div>
             </div>
         <% } %>
     </div>

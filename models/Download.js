@@ -4,24 +4,20 @@ const mongoose = require('mongoose');
 
 const downloadSchema = new mongoose.Schema({
     title: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
     },
-    description: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
-    },
-    url: {
+    file: {
         type: String,
-        required: true,
-        default: '#'
+        required: [true, 'File upload karna zaroori hai']
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    category: {
+        type: String,
+        default: 'General',
+        trim: true
     }
+}, {
+    timestamps: true
 });
 
-const Download = mongoose.model('Download', downloadSchema);
-
-module.exports = Download;
+module.exports = mongoose.model('Download', downloadSchema);

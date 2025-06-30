@@ -3,17 +3,19 @@
 const express = require('express');
 const router = express.Router();
 
-// Auth Controller se functions import karein
-const { renderLoginPage, loginUser, logoutUser } = require('../controllers/authController');
+// Controller aur middleware import karein
+const { renderLoginPage, loginUser, logoutUser } = require('../controllers/authController.js');
+const { loginLimiter } = require('../middleware/rateLimiter.js');
+const { isLoggedIn } = require('../middleware/authMiddleware.js');
+const { loginValidationRules } = require('../middleware/validationMiddleware.js');
 
 // Jab '/login' par GET request aaye, to login page dikhao
 router.get('/login', renderLoginPage);
 
 // Jab '/login' par POST request aaye (form submit ho), to login logic chalao
-router.post('/login', loginUser);
+router.post('/login', loginLimiter, loginValidationRules(), loginUser); // Yahan rate limiter aur validation dono lagaye gaye hain
 
 // Logout ke liye route
-router.get('/logout', logoutUser);
-
+router.get('/logout', isLoggedIn, logoutUser); // Sirf login user hi logout kar sakta hai
 
 module.exports = router;

@@ -3,28 +3,28 @@
 const mongoose = require('mongoose');
 
 const assignmentSchema = new mongoose.Schema({
+    title: {
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
+    },
     subject: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+        type: String,
+        required: [true, 'Mazmoon (Subject) likhna zaroori hai'],
+        trim: true
     },
-    task: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+    description: {
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
     },
-    dueDate: {
+    deadline: {
         type: Date,
-        required: true
+        required: [true, 'Aakhri tareekh (Deadline) zaroori hai']
     },
-    completed: {
-        type: Boolean,
-        default: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    file: {
+        type: String, // Path to the uploaded assignment file
     }
+}, {
+    timestamps: true
 });
 
-const Assignment = mongoose.model('Assignment', assignmentSchema);
-
-module.exports = Assignment;
+module.exports = mongoose.model('Assignment', assignmentSchema);

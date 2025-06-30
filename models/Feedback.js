@@ -3,19 +3,24 @@
 const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true
+    },
     message: {
         type: String,
-        required: [true, 'Feedback message cannot be empty.'],
-        trim: true,
-        minlength: [10, 'Feedback must be at least 10 characters long.']
-    },
-    // Hum isay 'anonymous' rakhenge, lekin mustaqbil mein user ID save kar sakte hain
-    submittedAt: {
-        type: Date,
-        default: Date.now
+        required: true,
+        trim: true
     }
+}, {
+    timestamps: true
 });
 
-const Feedback = mongoose.model('Feedback', feedbackSchema);
-
-module.exports = Feedback;
+module.exports = mongoose.model('Feedback', feedbackSchema);

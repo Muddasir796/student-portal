@@ -1,0 +1,43 @@
+<h2 class="mb-4"><%= title %></h2>
+
+<form action="/admin/downloads/add" method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="title_en" class="form-label">Title (English)</label>
+            <input type="text" class="form-control <%= errors.title_en ? 'is-invalid' : '' %>" id="title_en" name="title_en" value="<%= oldInput.title_en || '' %>" required>
+            <% if (errors.title_en) { %>
+                <div class="invalid-feedback"><%= errors.title_en %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="title_ur" class="form-label">Title (Urdu)</label>
+            <input type="text" class="form-control <%= errors.title_ur ? 'is-invalid' : '' %>" id="title_ur" name="title_ur" value="<%= oldInput.title_ur || '' %>" required dir="rtl">
+            <% if (errors.title_ur) { %>
+                <div class="invalid-feedback"><%= errors.title_ur %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="category" class="form-label">Category</label>
+            <input type="text" class="form-control <%= errors.category ? 'is-invalid' : '' %>" id="category" name="category" value="<%= oldInput.category || 'General' %>" required>
+            <div class="form-text">Group similar files (e.g., Admission Forms, Syllabus, Notices).</div>
+            <% if (errors.category) { %>
+                <div class="invalid-feedback"><%= errors.category %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="file" class="form-label">File</label>
+            <input class="form-control <%= errors.file ? 'is-invalid' : '' %>" type="file" id="file" name="file" required>
+            <% if (errors.file) { %>
+                <div class="invalid-feedback"><%= errors.file %></div>
+            <% } %>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success px-4">Add File</button>
+    <a href="/admin/downloads" class="btn btn-secondary">Cancel</a>
+</form>

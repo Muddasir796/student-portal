@@ -3,29 +3,31 @@
 const mongoose = require('mongoose');
 
 const teacherSchema = new mongoose.Schema({
-    // Hum name aur subject ko nested objects mein rakhenge taake English aur Urdu dono variants store kar sakein.
     name: {
-        en: { type: String, required: true, trim: true },
-        ur: { type: String, required: true, trim: true }
+        type: String,
+        required: [true, 'Teacher ka naam zaroori hai'],
+        trim: true
+    },
+    designation: {
+        type: String,
+        required: [true, 'Ohda (Designation) likhna zaroori hai'],
+        trim: true
     },
     subject: {
-        en: { type: String, required: true, trim: true },
-        ur: { type: String, required: true, trim: true }
-    },
-    photo: {
         type: String,
-        default: 'https://placehold.co/400x400/eee/ccc?text=No+Image'
+        required: [true, 'Mazmoon (Subject) likhna zaroori hai'],
+        trim: true
     },
-    officeHours: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+    contact: {
+        type: String,
+        trim: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    profileImage: {
+        type: String,
+        default: '/images/default-avatar.png' // Default image agar koi upload na ho
     }
+}, {
+    timestamps: true // Yeh `createdAt` aur `updatedAt` fields khud-ba-khud manage karega
 });
 
-const Teacher = mongoose.model('Teacher', teacherSchema);
-
-module.exports = Teacher;
+module.exports = mongoose.model('Teacher', teacherSchema);

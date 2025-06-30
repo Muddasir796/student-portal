@@ -1,50 +1,82 @@
-<%# views/admin/edit-assignment.ejs %>
+<h2 class="mb-4"><%= title %></h2>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
+<form action="/admin/assignments/edit/<%= assignment._id %>" method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-<% if (locals.error) { %>
-    <div class="error-message" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        <%= error %>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="title_en" class="form-label">Title (English)</label>
+            <input type="text" class="form-control <%= errors.title_en ? 'is-invalid' : '' %>" id="title_en" name="title_en" value="<%= oldInput.title_en || assignment.title.en %>" required>
+            <% if (errors.title_en) { %>
+                <div class="invalid-feedback"><%= errors.title_en %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="title_ur" class="form-label">Title (Urdu)</label>
+            <input type="text" class="form-control <%= errors.title_ur ? 'is-invalid' : '' %>" id="title_ur" name="title_ur" value="<%= oldInput.title_ur || assignment.title.ur %>" required dir="rtl">
+            <% if (errors.title_ur) { %>
+                <div class="invalid-feedback"><%= errors.title_ur %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" class="form-control <%= errors.subject ? 'is-invalid' : '' %>" id="subject" name="subject" value="<%= oldInput.subject || assignment.subject %>" required>
+            <% if (errors.subject) { %>
+                <div class="invalid-feedback"><%= errors.subject %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="deadline" class="form-label">Deadline</label>
+            <% 
+                let deadlineValue = '';
+                if (oldInput.deadline) {
+                    deadlineValue = oldInput.deadline;
+                } else if (assignment.deadline) {
+                    // Format date to YYYY-MM-DD for the input[type=date] field
+                    deadlineValue = new Date(assignment.deadline).toISOString().split('T')[0];
+                }
+            %>
+            <input type="date" class="form-control <%= errors.deadline ? 'is-invalid' : '' %>" id="deadline" name="deadline" value="<%= deadlineValue %>" required>
+            <% if (errors.deadline) { %>
+                <div class="invalid-feedback"><%= errors.deadline %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="description_en" class="form-label">Description (English)</label>
+            <textarea class="form-control <%= errors.description_en ? 'is-invalid' : '' %>" id="description_en" name="description_en" rows="4" required><%= oldInput.description_en || assignment.description.en %></textarea>
+            <% if (errors.description_en) { %>
+                <div class="invalid-feedback"><%= errors.description_en %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="description_ur" class="form-label">Description (Urdu)</label>
+            <textarea class="form-control <%= errors.description_ur ? 'is-invalid' : '' %>" id="description_ur" name="description_ur" rows="4" required dir="rtl"><%= oldInput.description_ur || assignment.description.ur %></textarea>
+            <% if (errors.description_ur) { %>
+                <div class="invalid-feedback"><%= errors.description_ur %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label for="file" class="form-label">New Attachment File (Optional)</label>
+            <% if (assignment.file) { %>
+                <div class="mb-2">
+                    <strong>Current File:</strong> 
+                    <a href="<%= assignment.file %>" target="_blank">View Current Attachment</a>
+                </div>
+            <% } %>
+            <input class="form-control" type="file" id="file" name="file">
+            <div class="form-text">Leave this empty if you do not want to change the attachment.</div>
+             <% if (errors.file) { %>
+                <div class="invalid-feedback"><%= errors.file %></div>
+            <% } %>
+        </div>
     </div>
-<% } %>
 
-<div class="card">
-    <form action="/admin/assignments/edit/<%= assignment._id %>" method="POST">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-                <label for="subject_en" style="display: block; margin-bottom: 0.5rem;">Subject (English)</label>
-                <input type="text" name="subject_en" id="subject_en" class="form-input" value="<%= assignment.subject.en %>" required>
-            </div>
-            <div class="form-group">
-                <label for="subject_ur" style="display: block; margin-bottom: 0.5rem;">Subject (Urdu)</label>
-                <input type="text" name="subject_ur" id="subject_ur" class="form-input" dir="rtl" value="<%= assignment.subject.ur %>" required>
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label for="task_en" style="display: block; margin-bottom: 0.5rem;">Task (English)</label>
-                <textarea name="task_en" id="task_en" class="form-input" rows="3" required><%= assignment.task.en %></textarea>
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label for="task_ur" style="display: block; margin-bottom: 0.5rem;">Task (Urdu)</label>
-                <textarea name="task_ur" id="task_ur" class="form-input" dir="rtl" rows="3" required><%= assignment.task.ur %></textarea>
-            </div>
-            <div class="form-group">
-                <label for="dueDate" style="display: block; margin-bottom: 0.5rem;">Due Date</label>
-                <input type="date" name="dueDate" id="dueDate" class="form-input" value="<%= assignment.dueDate.toISOString().split('T')[0] %>" required>
-            </div>
-            <div class="form-group" style="align-self: center;">
-                <label style="display: flex; align-items: center; gap: 0.5rem;">
-                    <%# Check the box if assignment is completed %>
-                    <input type="checkbox" name="completed" value="true" style="width: 1rem; height: 1rem;" <%= assignment.completed ? 'checked' : '' %>>
-                    <span>Is this assignment completed?</span>
-                </label>
-            </div>
-        </div>
-
-        <div style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">Update Assignment</button>
-            <a href="/admin/assignments" class="btn" style="background-color: #e5e7eb;">Cancel</a>
-        </div>
-    </form>
-</div>
+    <button type="submit" class="btn btn-success px-4">Update Assignment</button>
+    <a href="/admin/assignments" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,43 +1,41 @@
-<%# views/admin/add-note-subject.ejs %>
+<h2 class="mb-4"><%= title %></h2>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
+<form action="/admin/notes/add-subject" method="POST" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-<div class="card">
-    <form action="/admin/notes/add-subject" method="POST" class="form">
-        
-        <h3 class="form-section-title">Subject Details</h3>
-        <div class="form-group">
-            <label for="subjectEn">Subject Name (English)</label>
-            <input type="text" id="subjectEn" name="subjectEn" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="subjectUr">Subject Name (Urdu)</label>
-            <input type="text" id="subjectUr" name="subjectUr" class="form-control" required dir="rtl">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="subject_en" class="form-label">Subject Name (English)</label>
+            <input type="text" class="form-control <%= errors.subject_en ? 'is-invalid' : '' %>" id="subject_en" name="subject_en" value="<%= oldInput.subject_en || '' %>" required>
+            <% if (errors.subject_en) { %>
+                <div class="invalid-feedback"><%= errors.subject_en %></div>
+            <% } %>
         </div>
 
-        <hr style="margin: 2rem 0;">
-
-        <h3 class="form-section-title">First Note Details</h3>
-        <p class="form-section-description">Every subject must have at least one note to begin with.</p>
-        
-        <div class="form-group">
-            <label for="titleEn">Note Title (English)</label>
-            <input type="text" id="titleEn" name="titleEn" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="titleUr">Note Title (Urdu)</label>
-            <input type="text" id="titleUr" name="titleUr" class="form-control" required dir="rtl">
-        </div>
-        <div class="form-group">
-            <label for="url">Note URL</label>
-            <input type="url" id="url" name="url" class="form-control" required placeholder="https://example.com/note.pdf">
+        <div class="col-md-6 mb-3">
+            <label for="subject_ur" class="form-label">Subject Name (Urdu)</label>
+            <input type="text" class="form-control <%= errors.subject_ur ? 'is-invalid' : '' %>" id="subject_ur" name="subject_ur" value="<%= oldInput.subject_ur || '' %>" required dir="rtl">
+            <% if (errors.subject_ur) { %>
+                <div class="invalid-feedback"><%= errors.subject_ur %></div>
+            <% } %>
         </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Create Subject</button>
-            <a href="/admin/notes" class="btn" style="background-color: #e5e7eb;">Cancel</a>
+        <div class="col-md-12 mb-3">
+            <label for="slug" class="form-label">URL Slug</label>
+            <input type="text" class="form-control <%= errors.slug ? 'is-invalid' : '' %>" id="slug" name="slug" value="<%= oldInput.slug || '' %>" required>
+            <div class="form-text">
+                A unique, URL-friendly identifier. Use lowercase letters, numbers, and hyphens only (e.g., computer-science, islamic-studies-101).
+            </div>
+            <% if (errors.slug) { %>
+                <div class="invalid-feedback"><%= errors.slug %></div>
+            <% } %>
         </div>
-    </form>
-</div>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Note:</strong> You will add the actual notes (PDF links) after creating the subject.
+    </div>
+
+    <button type="submit" class="btn btn-success px-4 mt-3">Create Subject</button>
+    <a href="/admin/notes" class="btn btn-secondary mt-3">Cancel</a>
+</form>

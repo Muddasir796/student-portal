@@ -11,11 +11,18 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.7",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^7.5.1",
     "express-session": "^1.18.1",
-    "mongoose": "^8.16.0"
+    "helmet": "^8.1.0",
+    "mongoose": "^8.16.0",
+    "morgan": "^1.10.0",
+    "tiny-csrf": "^1.1.6"
   }
 }

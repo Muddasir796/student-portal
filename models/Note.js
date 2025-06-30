@@ -2,40 +2,40 @@
 
 const mongoose = require('mongoose');
 
-// Yeh ek note ka schema hai (jo array ke andar hoga)
-const singleNoteSchema = new mongoose.Schema({
+// This is a "sub-document" schema. It defines the structure of a single note
+// that will be embedded inside a Subject.
+const noteSchema = new mongoose.Schema({
     title: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
     },
     url: {
         type: String,
-        required: true,
-        default: '#'
+        required: [true, 'Note ka link (URL) zaroori hai'],
+        trim: true
     },
     date: {
         type: Date,
-        required: true
+        default: Date.now
     }
 });
 
-// Yeh poore subject ke notes ka schema hai
+// This is the main schema for a Subject that contains multiple notes.
 const subjectNotesSchema = new mongoose.Schema({
-    // Maslan: 'quranic-studies', 'hadith-literature'
     slug: {
         type: String,
-        required: true,
-        unique: true, // Har subject ka slug unique hoga
-        trim: true
+        required: [true, 'Slug zaroori hai (e.g., computer-science)'],
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     subject: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
     },
-    // Yahan hum upar wale singleNoteSchema ko as an array istemal kar rahe hain
-    notes: [singleNoteSchema] 
+    notes: [noteSchema] // This creates an array of note documents
+}, {
+    timestamps: true
 });
 
-const SubjectNotes = mongoose.model('SubjectNotes', subjectNotesSchema);
-
-module.exports = SubjectNotes;
+module.exports = mongoose.model('SubjectNotes', subjectNotesSchema);

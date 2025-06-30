@@ -3,20 +3,21 @@
 const mongoose = require('mongoose');
 
 const gallerySchema = new mongoose.Schema({
-    url: {
+    title: {
+        en: { type: String, required: true, trim: true },
+        ur: { type: String, required: true, trim: true }
+    },
+    image: {
         type: String,
-        required: true
+        required: [true, 'Image upload karna zaroori hai']
     },
-    caption: {
-        en: { type: String, required: true },
-        ur: { type: String, required: true }
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    category: {
+        type: String,
+        default: 'General Events',
+        trim: true
     }
+}, {
+    timestamps: true
 });
 
-const Gallery = mongoose.model('Gallery', gallerySchema);
-
-module.exports = Gallery;
+module.exports = mongoose.model('Gallery', gallerySchema);

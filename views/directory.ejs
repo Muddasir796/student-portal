@@ -1,32 +1,46 @@
- <%# views/directory.ejs (Updated with Search Form) %>
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Student Directory</h1>
+        <p class="lead text-muted">A list of all registered students in the program.</p>
+    </div>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-    
-    <!-- Search Form -->
-    <form action="/directory" method="GET" class="search-form" style="max-width: 300px;">
-        <input 
-            type="text" 
-            name="search" 
-            id="directory-search" 
-            placeholder="Search by name..." 
-            class="form-input"
-            value="<%= locals.searchTerm || '' %>"
-        >
-        <%# Aap yahan ek search button bhi laga sakte hain, lekin Enter dabane se bhi form submit ho jayega %>
-    </form>
-</div>
-
-<div class="directory-grid">
-    <% if (students && students.length > 0) { %>
-        <% students.forEach(student => { %>
-            <div class="student-card">
-                <img src="<%= student.photo %>" alt="<%= student.name %>" onerror="this.onerror=null;this.src='https://placehold.co/96x96/eee/ccc?text=Error';">
-                <h3><%= student.name %></h3>
-                <p>Semester <%= student.semester %></p>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Photo</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Roll Number</th>
+                            <th scope="col">Class</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(students.length > 0) { %>
+                            <% students.forEach((student, index) => { %>
+                                <tr>
+                                    <th scope="row"><%= index + 1 %></th>
+                                    <td>
+                                        <img 
+                                            src="<%= student.profileImage %>" 
+                                            alt="<%= student.name %>" 
+                                            class="rounded-circle" width="40" height="40" style="object-fit: cover;">
+                                    </td>
+                                    <td><%= student.name %></td>
+                                    <td><%= student.rollNumber %></td>
+                                    <td><%= student.class %></td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No students are currently registered in the directory.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
-        <% }) %>
-    <% } else { %>
-        <p>No students found matching your search.</p>
-    <% } %>
+        </div>
+    </div>
 </div>

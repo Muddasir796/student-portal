@@ -1,0 +1,107 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><%= title %></h2>
+    <a href="/admin/quiz" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle me-2"></i>Back to Quiz Selection
+    </a>
+</div>
+
+<!-- List of Existing Questions -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Existing Questions (<%= quiz ? quiz.questions.length : 0 %>)</h5>
+    </div>
+    <div class="card-body">
+        <% if(quiz && quiz.questions.length > 0) { %>
+            <ul class="list-group">
+                <% quiz.questions.forEach(q => { %>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="w-75">
+                            <strong>Q:</strong> <%= q.question %>
+                            <br>
+                            <small class="text-success"><strong>Ans:</strong> <%= q.answer %></small>
+                        </div>
+                        <a href="/admin/quiz/edit/<%= quiz.language %>/delete/<%= q._id %>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this question?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p class="text-muted text-center">No questions have been added for this quiz yet.</p>
+        <% } %>
+    </div>
+</div>
+
+<!-- Form to Add a New Question -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Add a New Question</h5>
+    </div>
+    <div class="card-body">
+        <form action="/admin/quiz/edit/<%= lang %>/add" method="POST" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <div class="mb-3">
+                <label for="question" class="form-label">Question Text</label>
+                <textarea class="form-control <%= errors.question ? 'is-invalid' : '' %>" id="question" name="question" rows="2" required><%= oldInput.question || '' %></textarea>
+                <% if (errors.question) { %><div class="invalid-feedback"><%= errors.question %></div><% } %>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="option1" class="form-label">Option 1</label>
+                    <input type="text" class="form-control <%= errors.option1 ? 'is-invalid' : '' %>" id="option1" name="option1" value="<%= oldInput.option1 || '' %>" required>
+                    <% if (errors.option1) { %><div class="invalid-feedback"><%= errors.option1 %></div><% } %>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="option2" class="form-label">Option 2</label>
+                    <input type="text" class="form-control <%= errors.option2 ? 'is-invalid' : '' %>" id="option2" name="option2" value="<%= oldInput.option2 || '' %>" required>
+                    <% if (errors.option2) { %><div class="invalid-feedback"><%= errors.option2 %></div><% } %>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="option3" class="form-label">Option 3</label>
+                    <input type="text" class="form-control <%= errors.option3 ? 'is-invalid' : '' %>" id="option3" name="option3" value="<%= oldInput.option3 || '' %>" required>
+                    <% if (errors.option3) { %><div class="invalid-feedback"><%= errors.option3 %></div><% } %>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="option4" class="form-label">Option 4</label>
+                    <input type="text" class="form-control <%= errors.option4 ? 'is-invalid' : '' %>" id="option4" name="option4" value="<%= oldInput.option4 || '' %>" required>
+                    <% if (errors.option4) { %><div class="invalid-feedback"><%= errors.option4 %></div><% } %>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="answer" class="form-label">Correct Answer</label>
+                <input type="text" class="form-control <%= errors.answer ? 'is-invalid' : '' %>" id="answer" name="answer" value="<%= oldInput.answer || '' %>" required>
+                <div class="form-text">The correct answer must exactly match one of the options above.</div>
+                <% if (errors.answer) { %><div class="invalid-feedback"><%= errors.answer %></div><% } %>
+            </div>
+
+            <button type="submit" class="btn btn-success">Add Question</button>
+        </form>
+    </div>
+</div>
+
+<!-- Bulk Upload Section -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Bulk Upload Questions from CSV</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">
+            You can add multiple questions at once by uploading a CSV file.
+            <a href="/templates/quiz_template.csv" download>Download the template file</a> to get started.
+        </p>
+        <hr>
+        <form action="/admin/quiz/upload/<%= lang %>" method="POST" enctype="multipart/form-data" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="mb-3">
+                <label for="quizFile" class="form-label">Select CSV File</label>
+                <input class="form-control" type="file" id="quizFile" name="quizFile" accept=".csv" required>
+            </div>
+            <button type="submit" class="btn btn-info">
+                <i class="bi bi-upload me-2"></i>Upload and Add Questions
+            </button>
+        </form>
+    </div>
+</div>

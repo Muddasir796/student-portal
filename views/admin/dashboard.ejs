@@ -1,84 +1,56 @@
-<%# views/admin/dashboard.ejs (Updated with Live Data) %>
+<h2 class="mb-4"><%= title %></h2>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
+<div class="row">
+    <!-- Students Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-primary shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">Total Students</h5>
+                    <p class="card-text fs-2 fw-bold"><%= studentCount %></p>
+                </div>
+                <i class="bi bi-people-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+            </div>
+            <a href="/admin/students" class="card-footer text-white text-decoration-none">
+                View Details <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Teachers Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">Total Teachers</h5>
+                    <p class="card-text fs-2 fw-bold"><%= teacherCount %></p>
+                </div>
+                <i class="bi bi-person-video3" style="font-size: 3rem; opacity: 0.5;"></i>
+            </div>
+            <a href="/admin/teachers" class="card-footer text-white text-decoration-none">
+                View Details <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Assignments Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-warning shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">Total Assignments</h5>
+                    <p class="card-text fs-2 fw-bold"><%= assignmentCount %></p>
+                </div>
+                <i class="bi bi-journal-check" style="font-size: 3rem; opacity: 0.5;"></i>
+            </div>
+            <a href="/admin/assignments" class="card-footer text-white text-decoration-none">
+                View Details <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
 </div>
 
-<style>
-    /* Styles for the new stat cards */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-    .stat-card-admin {
-        background-color: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-    .stat-card-admin .icon-wrapper {
-        padding: 1rem;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .stat-card-admin .icon-wrapper.students { background-color: #e0f2fe; } /* Light Blue */
-    .stat-card-admin .icon-wrapper.teachers { background-color: #dcfce7; } /* Light Green */
-    .stat-card-admin .icon-wrapper.assignments { background-color: #fef9c3; } /* Light Yellow */
-    .stat-card-admin .icon {
-        width: 28px;
-        height: 28px;
-    }
-    .stat-card-admin .icon.students { color: #0ea5e9; }
-    .stat-card-admin .icon.teachers { color: #22c55e; }
-    .stat-card-admin .icon.assignments { color: #eab308; }
-
-    .stat-info .stat-number {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: var(--text-dark);
-    }
-    .stat-info .stat-label {
-        color: #6b7280;
-    }
-</style>
-
-<div class="stats-grid">
-    <!-- Student Stat Card -->
-    <div class="stat-card-admin">
-        <div class="icon-wrapper students">
-            <svg class="icon students" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        </div>
-        <div class="stat-info">
-            <p class="stat-number"><%= studentCount %></p>
-            <p class="stat-label">Total Students</p>
-        </div>
-    </div>
-
-    <!-- Teacher Stat Card -->
-    <div class="stat-card-admin">
-        <div class="icon-wrapper teachers">
-            <svg class="icon teachers" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </div>
-        <div class="stat-info">
-            <p class="stat-number"><%= teacherCount %></p>
-            <p class="stat-label">Total Teachers</p>
-        </div>
-    </div>
-
-    <!-- Assignment Stat Card -->
-    <div class="stat-card-admin">
-        <div class="icon-wrapper assignments">
-            <svg class="icon assignments" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        </div>
-        <div class="stat-info">
-            <p class="stat-number"><%= assignmentCount %></p>
-            <p class="stat-label">Total Assignments</p>
-        </div>
-    </div>
+<div class="alert alert-info mt-3">
+    <h4 class="alert-heading">Welcome to the Admin Panel!</h4>
+    <p>You can manage all aspects of the student portal from here. Use the sidebar to navigate between different sections like Students, Teachers, and Assignments.</p>
 </div>

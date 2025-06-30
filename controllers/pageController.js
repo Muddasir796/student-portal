@@ -1,70 +1,147 @@
-// controllers/pageController.js (Updated to handle language)
+// controllers/pageController.js
 
-// --- Model Imports ---
-const Student = require('../models/Student.js');
-const Teacher = require('../models/Teacher.js');
-const Assignment = require('../models/Assignment.js');
-const SubjectNotes = require('../models/Note.js');
-const Quiz = require('../models/Quiz.js');
-const Download = require('../models/Download.js');
-const Gallery = require('../models/Gallery.js');
+const asyncHandler = require('../utils/asyncHandler');
+const Teacher = require('../models/Teacher');
+const Student = require('../models/Student');
+const Assignment = require('../models/Assignment');
+const SubjectNotes = require('../models/Note');
+const Download = require('../models/Download');
+const Gallery = require('../models/Gallery');
+const Quiz = require('../models/Quiz');
 
-// --- Helper Function ---
+// Helper function to get language from request
 const getLanguage = (req) => req.query.lang === 'ur' ? 'ur' : 'en';
 
-// --- Page Rendering Logic ---
+const renderDashboard = (req, res) => {
+    // This is the main public-facing homepage.
+    res.render('dashboard', { title: 'Dashboard', lang: getLanguage(req) });
+};
 
-const renderDirectory = async (req, res) => {
-    try {
-        const lang = getLanguage(req);
-        const searchTerm = req.query.search || '';
-        const filter = {};
-        if (searchTerm) {
-            filter.name = { $regex: searchTerm, $options: 'i' };
+const renderDirectory = asyncHandler(async (req, res) => {
+    const students = await Student.find({}).sort({ name: 1 }); // Sort alphabetically
+    res.render('directory', {
+        title: 'Student Directory',
+        students,
+        lang: getLanguage(req)
+    });
+});
+
+const renderTimetable = (req, res) => {
+    res.send('Timetable Page - TODO');
+};
+
+const renderAssignments = asyncHandler(async (req, res) => {
+    const assignments = await Assignment.find({}).sort({ deadline: 1 }); // Sort by nearest deadline
+    res.render('assignments', {
+        title: 'Current Assignments',
+        assignments,
+        lang: getLanguage(req)
+    });
+});
+
+// This is the first dynamic public page we are building.
+const renderTeachers = asyncHandler(async (req, res) => {
+    const teachers = await Teacher.find({}).sort({ createdAt: 'asc' });
+    res.render('teachers', { 
+        title: 'Our Faculty', 
+        teachers,
+        lang: getLanguage(req) 
+    });
+});
+
+const renderNotes = asyncHandler(async (req, res) => {
+    const subjects = await SubjectNotes.find({}).sort({ 'subject.en': 1 });
+    res.render('notes', {
+        title: 'Course Notes',
+        subjects,
+        lang: getLanguage(req)
+    });
+});
+
+const renderQuiz = asyncHandler(async (req, res) => {
+    const lang = getLanguage(req);
+    const quiz = await Quiz.findOne({ language: lang });
+
+    res.render('quiz', {
+        title: 'Test Your Knowledge',
+        quiz,
+        lang
+    });
+});
+
+const renderDownloads = asyncHandler(async (req, res) => {
+    const downloads = await Download.find({}).sort({ category: 1, createdAt: -1 });
+
+    // Group downloads by category for better organization in the view
+    const groupedDownloads = downloads.reduce((acc, download) => {
+        const category = download.category;
+        if (!acc[category]) {
+            acc[category] = [];
         }
-        const allStudents = await Student.find(filter);
-        res.render('directory', { 
-            students: allStudents, 
-            pageTitle: 'Student Directory',
-            searchTerm: searchTerm,
-            lang: lang // Language ko view mein bhejein
-        });
-    } catch (error) {
-        console.log("Directory page render karne mein masla hai: ", error);
-        res.status(500).send("Oops! Something went wrong.");
-    }
+        acc[category].push(download);
+        return acc;
+    }, {});
+
+    res.render('downloads', {
+        title: 'Downloads',
+        groupedDownloads,
+        lang: getLanguage(req)
+    });
+});
+
+const renderGallery = asyncHandler(async (req, res) => {
+    const images = await Gallery.find({}).sort({ category: 1, createdAt: -1 });
+
+    // Group images by category for better organization
+    const groupedImages = images.reduce((acc, image) => {
+        const category = image.category;
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(image);
+        return acc;
+    }, {});
+
+    res.render('gallery', {
+        title: 'Image Gallery',
+        groupedImages,
+        lang: getLanguage(req)
+    });
+});
+
+const renderCalculator = (req, res) => {
+    res.send('Calculator Page - TODO');
 };
 
-const renderTeachers = async (req, res) => {
-    try {
-        const lang = getLanguage(req);
-        const allTeachers = await Teacher.find({});
-        res.render('teachers', {
-            teachers: allTeachers,
-            pageTitle: 'Faculty Information',
-            lang: lang
-        });
-    } catch (error) {
-        console.error("Teachers page render karne mein masla hai: ", error);
-        res.status(500).send("Oops! Something went wrong.");
-    }
+const renderBirthdays = asyncHandler(async (req, res) => {
+    const today = new Date();
+    // Set time to 0 to avoid timezone issues
+    today.setHours(0, 0, 0, 0); 
+
+    // Efficiently find students with a birthday today using MongoDB's aggregation pipeline
+    const studentsWithBirthday = await Student.aggregate([
+        {
+            $match: {
+                birthday: { $exists: true }, // Ensure the birthday field exists
+                $expr: {
+                    $and: [
+                        { $eq: [{ $dayOfMonth: '$birthday' }, today.getDate()] },
+                        { $eq: [{ $month: '$birthday' }, today.getMonth() + 1] }
+                    ]
+                }
+            }
+        }
+    ]);
+
+    res.render('birthdays', { title: "Today's Birthdays", students: studentsWithBirthday, lang: getLanguage(req) });
+});
+
+const renderFeedback = (req, res) => {
+    res.render('feedback', { title: 'Feedback', lang: getLanguage(req) });
 };
 
-// Baqi tamam public pages mein bhi 'lang' bhejein
-const renderDashboard = (req, res) => res.render('dashboard', { pageTitle: 'Dashboard', lang: getLanguage(req) });
-const renderTimetable = (req, res) => { const timetableData = require('../data/timetable.js'); res.render('timetable', { data: timetableData, pageTitle: 'Class Timetable', lang: getLanguage(req) }); };
-const renderAssignments = async (req, res) => { try { const assignments = await Assignment.find({}); res.render('assignments', { assignments, pageTitle: 'Assignments', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderNotes = async (req, res) => { try { const notesArray = await SubjectNotes.find({}); const notesObject = notesArray.reduce((obj, item) => { obj[item.slug] = item; return obj; }, {}); res.render('notes', { subjects: notesObject, pageTitle: 'Subject Notes', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderQuiz = async (req, res) => { try { const quizArray = await Quiz.find({}); const quizObject = quizArray.reduce((obj, item) => { obj[item.language] = { questions: item.questions }; return obj; }, {}); res.render('quiz', { quiz: quizObject, pageTitle: 'Quiz Zone', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderDownloads = async (req, res) => { try { const files = await Download.find({}); res.render('downloads', { files, pageTitle: 'Download Center', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderGallery = async (req, res) => { try { const images = await Gallery.find({}); res.render('gallery', { images, pageTitle: 'Photo Gallery', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderCalculator = (req, res) => res.render('calculator', { pageTitle: 'GPA Calculator', lang: getLanguage(req) });
-const renderBirthdays = async (req, res) => { try { const students = await Student.find({}); res.render('birthdays', { students, pageTitle: 'Upcoming Birthdays', lang: getLanguage(req) }); } catch (e) { res.status(500).send("Error"); } };
-const renderFeedback = (req, res) => res.render('feedback', { pageTitle: 'Feedback & Suggestions', lang: getLanguage(req) });
-
-// --- Exports ---
 module.exports = {
-    renderDashboard, renderDirectory, renderTeachers, renderTimetable, renderAssignments,
-    renderNotes, renderQuiz, renderDownloads, renderGallery, renderCalculator,
-    renderBirthdays, renderFeedback
+    renderDashboard, renderDirectory, renderTimetable, renderAssignments,
+    renderTeachers, renderNotes, renderQuiz, renderDownloads, renderGallery,
+    renderCalculator, renderBirthdays, renderFeedback
 };

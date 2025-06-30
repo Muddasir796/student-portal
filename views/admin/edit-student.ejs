@@ -1,37 +1,82 @@
-<%# views/admin/edit-student.ejs %>
+<h2 class="mb-4"><%= title %></h2>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
+<form action="/admin/students/edit/<%= student._id %>" method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-<% if (locals.error) { %>
-    <div class="error-message" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        <%= error %>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="name" class="form-label">Student Name</label>
+            <input type="text" class="form-control <%= errors.name ? 'is-invalid' : '' %>" id="name" name="name" value="<%= oldInput.name || '' %>" required>
+            <% if (errors.name) { %>
+                <div class="invalid-feedback"><%= errors.name %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="rollNumber" class="form-label">Roll Number</label>
+            <input type="text" class="form-control <%= errors.rollNumber ? 'is-invalid' : '' %>" id="rollNumber" name="rollNumber" value="<%= oldInput.rollNumber || '' %>" required>
+            <% if (errors.rollNumber) { %>
+                <div class="invalid-feedback"><%= errors.rollNumber %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="class" class="form-label">Class</label>
+            <input type="text" class="form-control <%= errors.class ? 'is-invalid' : '' %>" id="class" name="class" value="<%= oldInput.class || '' %>" required>
+            <% if (errors.class) { %>
+                <div class="invalid-feedback"><%= errors.class %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="contact" class="form-label">Contact Number (Optional)</label>
+            <input type="text" class="form-control <%= errors.contact ? 'is-invalid' : '' %>" id="contact" name="contact" value="<%= oldInput.contact || '' %>">
+            <% if (errors.contact) { %>
+                <div class="invalid-feedback"><%= errors.contact %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="birthday" class="form-label">Birthday (Optional)</label>
+            <% 
+                let birthdayValue = '';
+                if (oldInput.birthday) {
+                    birthdayValue = oldInput.birthday;
+                } else if (student.birthday) {
+                    birthdayValue = new Date(student.birthday).toISOString().split('T')[0];
+                }
+            %>
+            <input type="date" class="form-control <%= errors.birthday ? 'is-invalid' : '' %>" id="birthday" name="birthday" value="<%= birthdayValue %>">
+            <% if (errors.birthday) { %>
+                <div class="invalid-feedback"><%= errors.birthday %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label for="address" class="form-label">Address</label>
+            <textarea class="form-control <%= errors.address ? 'is-invalid' : '' %>" id="address" name="address" rows="3" required><%= oldInput.address || '' %></textarea>
+            <% if (errors.address) { %>
+                <div class="invalid-feedback"><%= errors.address %></div>
+            <% } %>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label for="profileImage" class="form-label">Nayi Profile Picture (Optional)</label>
+            <div class="d-flex align-items-center">
+                <img src="<%= student.profileImage %>" alt="<%= student.name %>" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                <input 
+                    class="form-control <%= errors.profileImage ? 'is-invalid' : '' %>" 
+                    type="file" 
+                    id="profileImage" 
+                    name="profileImage">
+            </div>
+            <div class="form-text">Agar aap tasveer tabdeel nahi karna chahte to isay khali chor dein.</div>
+            <% if (errors.profileImage) { %>
+                <div class="invalid-feedback"><%= errors.profileImage %></div>
+            <% } %>
+        </div>
     </div>
-<% } %>
 
-<div class="card">
-    <%# Form ka action URL student ki ID ke sath hoga %>
-    <form action="/admin/students/edit/<%= student._id %>" method="POST">
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label for="name" style="display: block; margin-bottom: 0.5rem;">Student Name</label>
-            <input type="text" name="name" id="name" class="form-input" value="<%= student.name %>" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label for="semester" style="display: block; margin-bottom: 0.5rem;">Semester</label>
-            <input type="number" name="semester" id="semester" class="form-input" min="1" max="8" value="<%= student.semester %>" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label for="birthday" style="display: block; margin-bottom: 0.5rem;">Birthday</label>
-            <%# Date ko YYYY-MM-DD format mein convert karna zaroori hai input ke liye %>
-            <input type="date" name="birthday" id="birthday" class="form-input" value="<%= student.birthday.toISOString().split('T')[0] %>" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label for="photo" style="display: block; margin-bottom: 0.5rem;">Photo URL (Optional)</label>
-            <input type="text" name="photo" id="photo" class="form-input" value="<%= student.photo %>">
-        </div>
-
-        <button type="submit" class="btn btn-primary">Update Student</button>
-        <a href="/admin/students" class="btn" style="background-color: #e5e7eb;">Cancel</a>
-    </form>
-</div>
+    <button type="submit" class="btn btn-success px-4">Update Student</button>
+    <a href="/admin/students" class="btn btn-secondary">Cancel</a>
+</form>

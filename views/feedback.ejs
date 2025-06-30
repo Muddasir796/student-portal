@@ -1,98 +1,93 @@
-<%# Yeh file views/feedback.ejs hai (Final version with API call) %>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">Submit Feedback</h1>
+                <p class="lead text-muted">We value your opinion. Please let us know how we can improve.</p>
+            </div>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form id="feedback-form" novalidate>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="invalid-feedback" id="name-error"></div>
+                        </div>
 
-<style>
-    .feedback-container { max-width: 800px; margin: 0 auto; }
-    .feedback-form .form-group { margin-bottom: 1.5rem; }
-    .feedback-form label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
-    .feedback-form textarea { min-height: 150px; resize: vertical; }
-    .feedback-description { margin-bottom: 1.5rem; color: #6b7280; text-align: center; background-color: #f9fafb; padding: 1rem; border-radius: 0.5rem; }
-    #feedback-response-msg {
-        display: none; /* Initially hidden */
-        text-align: center;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        margin-bottom: 1rem;
-    }
-    #feedback-response-msg.success {
-        color: var(--primary-green);
-        background-color: #d1fae5;
-    }
-    #feedback-response-msg.error {
-        color: #991b1b; /* Red */
-        background-color: #fee2e2;
-    }
-</style>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Your Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback" id="email-error"></div>
+                        </div>
 
-<div class="feedback-container card">
-    <p class="feedback-description">
-        Your feedback is valuable for the improvement of this portal. All submissions are anonymous.
-    </p>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Your Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                            <div class="invalid-feedback" id="message-error"></div>
+                        </div>
 
-    <div id="feedback-response-msg">
-        <%# Response message will be shown here %>
-    </div>
-
-    <form id="feedback-form" class="feedback-form">
-        <div class="form-group">
-            <label for="feedback-message">Your Message:</label>
-            <textarea id="feedback-message" class="form-input" placeholder="Please type your suggestions or report any issues here..." required minlength="10"></textarea>
+                        <button type="submit" id="submit-btn" class="btn btn-primary">
+                            Send Feedback
+                        </button>
+                    </form>
+                    <div id="form-response" class="mt-3"></div>
+                </div>
+            </div>
         </div>
-        <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%;">Submit Feedback</button>
-    </form>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const feedbackForm = document.getElementById('feedback-form');
-        const responseMsg = document.getElementById('feedback-response-msg');
-        const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('feedback-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const formResponse = document.getElementById('form-response');
 
-        if(feedbackForm) {
-            feedbackForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); 
-                
-                const message = document.getElementById('feedback-message').value;
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Submitting...';
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        formResponse.innerHTML = '';
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
 
-                try {
-                    // Fetch API ka istemal kar ke data server ko bhejein
-                    const response = await fetch('/api/feedback', {
-                        method: 'POST', // Hum data bhej rahe hain
-                        headers: {
-                            'Content-Type': 'application/json' // Hum JSON format mein data bhej rahe hain
-                        },
-                        body: JSON.stringify({ message: message }) // Data ko JSON string mein convert karein
-                    });
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...`;
 
-                    const result = await response.json(); // Server ka jawab hasil karein
-
-                    if (result.success) {
-                        // Agar kamyab ho
-                        feedbackForm.style.display = 'none';
-                        responseMsg.textContent = result.message;
-                        responseMsg.className = 'success';
-                        responseMsg.style.display = 'block';
-                    } else {
-                        // Agar server se error aaye
-                        throw new Error(result.message || 'An unknown error occurred.');
-                    }
-
-                } catch (error) {
-                    // Agar network ya koi aur error aaye
-                    console.error('Feedback submission failed:', error);
-                    responseMsg.textContent = `Error: ${error.message}`;
-                    responseMsg.className = 'error';
-                    responseMsg.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit Feedback';
-                }
+        try {
+            const response = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<%= csrfToken %>'
+                },
+                body: JSON.stringify({ name: form.name.value, email: form.email.value, message: form.message.value }),
             });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (result.errors) {
+                    result.errors.forEach(error => {
+                        const inputEl = document.getElementById(error.path);
+                        const errorEl = document.getElementById(`${error.path}-error`);
+                        if (inputEl && errorEl) {
+                            inputEl.classList.add('is-invalid');
+                            errorEl.textContent = error.msg;
+                        }
+                    });
+                }
+                throw new Error(result.message || 'An error occurred.');
+            }
+
+            form.reset();
+            formResponse.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+
+        } catch (error) {
+            formResponse.innerHTML = `<div class="alert alert-danger">Failed to send feedback. Please try again later.</div>`;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Send Feedback';
         }
     });
 </script>

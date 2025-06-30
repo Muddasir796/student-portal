@@ -1,74 +1,49 @@
-<%# Yeh file views/assignments.ejs hai %>
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Current Assignments</h1>
+        <p class="lead text-muted">Stay up-to-date with all your coursework and deadlines.</p>
+    </div>
 
-<div class="page-header">
-    <h2 class="page-title"><%= pageTitle %></h2>
-</div>
-
-<style>
-    .assignments-table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-    }
-    .assignments-table th, .assignments-table td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .assignments-table thead {
-        background-color: #f9fafb;
-    }
-    .assignments-table tbody tr:hover {
-        background-color: #f9fafb;
-    }
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: capitalize;
-    }
-    .status-completed {
-        background-color: #d1fae5; /* Green */
-        color: #065f46;
-    }
-    .status-pending {
-        background-color: #fef3c7; /* Yellow */
-        color: #92400e;
-    }
-</style>
-
-<div class="card" style="overflow-x: auto;">
-    <table class="assignments-table">
-        <thead>
-            <tr>
-                <%# We will assume English for now. This can be made dynamic later. %>
-                <th>Subject</th>
-                <th>Task</th>
-                <th>Due Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (locals.assignments && assignments.length > 0) { %>
-                <% assignments.forEach(assignment => { %>
-                    <tr>
-                        <td><%= assignment.subject.en %></td>
-                        <td><%= assignment.task.en %></td>
-                        <td><%= assignment.dueDate %></td>
-                        <td>
-                            <% if (assignment.completed) { %>
-                                <span class="status-badge status-completed">Completed</span>
-                            <% } else { %>
-                                <span class="status-badge status-pending">Pending</span>
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 2rem;">No assignments found.</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+    <div class="row">
+        <% if(assignments.length > 0) { %>
+            <% assignments.forEach(assignment => { %>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0" dir="<%= lang === 'ur' ? 'rtl' : 'ltr' %>">
+                                <%= assignment.title[lang] || assignment.title.en %>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <strong>Subject:</strong> <%= assignment.subject %>
+                            </h6>
+                            <p class="card-text" dir="<%= lang === 'ur' ? 'rtl' : 'ltr' %>">
+                                <%= assignment.description[lang] || assignment.description.en %>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Deadline:</strong> 
+                                    <span class="text-danger fw-bold"><%= new Date(assignment.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></span>
+                                </div>
+                                <% if (assignment.file) { %>
+                                    <a href="<%= assignment.file %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download me-1"></i> Download File
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <p class="mb-0">There are no active assignments at the moment. Well done!</p>
+                </div>
+            </div>
+        <% } %>
+    </div>
 </div>

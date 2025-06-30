@@ -1,68 +1,64 @@
-<%# views/admin/edit-note-subject.ejs %>
+<h2 class="mb-4"><%= title %>: <span class="text-muted"><%= subject.subject[lang] || subject.subject.en %></span></h2>
 
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h2 class="page-title"><%= pageTitle %></h2>
-        <p style="margin-top: 0.5rem; color: #6c757d;"><%= lang === 'ur' ? subject.subject.ur : subject.subject.en %></p>
+<!-- List of Existing Notes -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Existing Notes (<%= subject.notes.length %>)</h5>
     </div>
-    <a href="/admin/notes" class="btn">Back to All Subjects</a>
+    <div class="card-body">
+        <% if(subject.notes.length > 0) { %>
+            <ul class="list-group">
+                <% subject.notes.forEach(note => { %>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="<%= note.url %>" target="_blank"><%= note.title[lang] || note.title.en %></a>
+                            <small class="d-block text-muted">Added on: <%= new Date(note.date).toLocaleDateString('en-GB') %></small>
+                        </div>
+                        <a href="/admin/notes/edit/<%= subject.slug %>/delete-note/<%= note._id %>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this note?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p class="text-muted text-center">No notes have been added to this subject yet.</p>
+        <% } %>
+    </div>
 </div>
 
-<%# Form to Add New Note %>
-<div class="card">
-    <h3 class="card-header">Add New Note</h3>
-    <form action="/admin/notes/edit/<%= subject.slug %>/add-note" method="POST" class="form">
-        <div class="form-group">
-            <label for="titleEn">Note Title (English)</label>
-            <input type="text" id="titleEn" name="titleEn" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="titleUr">Note Title (Urdu)</label>
-            <input type="text" id="titleUr" name="titleUr" class="form-control" required dir="rtl">
-        </div>
-        <div class="form-group">
-            <label for="url">Note URL</label>
-            <input type="url" id="url" name="url" class="form-control" required placeholder="https://example.com/note.pdf">
-        </div>
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Add Note</button>
-        </div>
-    </form>
-</div>
-
-<%# List of Existing Notes %>
-<div class="card" style="margin-top: 2rem;">
-    <h3 class="card-header">Existing Notes (<%= subject.notes.length %>)</h3>
-    <div style="overflow-x: auto;">
-        <table class="table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Title</th>
-                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Date Added</th>
-                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color);">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (subject.notes && subject.notes.length > 0) { %>
-                    <% subject.notes.sort((a, b) => b.date - a.date).forEach(note => { %>
-                        <tr style="border-bottom: 1px solid var(--border-color);">
-                            <td style="padding: 0.75rem;">
-                                <a href="<%= note.url %>" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
-                                    <%= lang === 'ur' ? note.title.ur : note.title.en %>
-                                </a>
-                            </td>
-                            <td style="padding: 0.75rem;"><%= new Date(note.date).toLocaleDateString() %></td>
-                            <td style="padding: 0.75rem;">
-                                <a href="/admin/notes/edit/<%= subject.slug %>/delete-note/<%= note._id %>" class="btn btn-primary" style="background-color: #ef4444; font-size: 0.875rem; padding: 0.25rem 0.5rem;" onclick="return confirm('Are you sure you want to delete this note?');">Delete</a>
-                            </td>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="3" style="padding: 1rem; text-align: center;">No notes found for this subject.</td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
+<!-- Form to Add a New Note -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Add a New Note</h5>
+    </div>
+    <div class="card-body">
+        <form action="/admin/notes/edit/<%= subject.slug %>/add-note" method="POST" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="note_title_en" class="form-label">Note Title (English)</label>
+                    <input type="text" class="form-control <%= errors.note_title_en ? 'is-invalid' : '' %>" id="note_title_en" name="note_title_en" value="<%= oldInput.note_title_en || '' %>" required>
+                    <% if (errors.note_title_en) { %>
+                        <div class="invalid-feedback"><%= errors.note_title_en %></div>
+                    <% } %>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="note_title_ur" class="form-label">Note Title (Urdu)</label>
+                    <input type="text" class="form-control <%= errors.note_title_ur ? 'is-invalid' : '' %>" id="note_title_ur" name="note_title_ur" value="<%= oldInput.note_title_ur || '' %>" required dir="rtl">
+                    <% if (errors.note_title_ur) { %>
+                        <div class="invalid-feedback"><%= errors.note_title_ur %></div>
+                    <% } %>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label for="note_url" class="form-label">Note URL (Link to PDF, etc.)</label>
+                    <input type="url" class="form-control <%= errors.note_url ? 'is-invalid' : '' %>" id="note_url" name="note_url" value="<%= oldInput.note_url || '' %>" required placeholder="https://example.com/path/to/note.pdf">
+                    <% if (errors.note_url) { %>
+                        <div class="invalid-feedback"><%= errors.note_url %></div>
+                    <% } %>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Add Note</button>
+            <a href="/admin/notes" class="btn btn-secondary">Back to Subjects</a>
+        </form>
     </div>
 </div>

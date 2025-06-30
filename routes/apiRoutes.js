@@ -5,10 +5,11 @@ const router = express.Router();
 
 // API Controller se 'submitFeedback' function import karein
 const { submitFeedback } = require('../controllers/apiController.js');
+const { feedbackValidationRules } = require('../middleware/apiValidationMiddleware.js');
 
 // Jab is route par POST request aaye, to submitFeedback function chalao
 // Poora URL banega: /api/feedback
-router.post('/feedback', submitFeedback);
+router.post('/feedback', feedbackValidationRules(), submitFeedback);
 
 // Is router ko export karein
 module.exports = router;
