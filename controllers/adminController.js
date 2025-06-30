@@ -1,133 +1,56 @@
-// controllers/adminController.js (Updated to handle language parameter)
-
-const Student = require('../models/Student');
-const Teacher = require('../models/Teacher');
-const Assignment = require('../models/Assignment');
-// Note: Baqi models abhi istemal nahi ho rahe, lekin hum unhein baad mein add kar sakte hain.
-
-// =================================================================
-// Helper function to get language from request
-// =================================================================
-const getLanguage = (req) => {
-    // URL se 'lang' query parameter hasil karein, agar nahi hai to 'en' default istemal karein
-    return req.query.lang === 'ur' ? 'ur' : 'en';
-};
-
 
 // =================================================================
 // ADMIN DASHBOARD & PROFILE
 // =================================================================
-
-const getAdminDashboard = async (req, res) => {
-    try {
-        const lang = getLanguage(req);
-        const [studentCount, teacherCount, assignmentCount] = await Promise.all([
-            Student.countDocuments(), Teacher.countDocuments(), Assignment.countDocuments()
-        ]);
-        res.render('admin/dashboard', {
-            layout: 'admin/layout',
-            pageTitle: 'Admin Dashboard',
-            lang, // Language ko view mein bhejein
-            studentCount,
-            teacherCount,
-            assignmentCount
-        });
-    } catch (error) {
-        console.error("Admin dashboard load karne mein masla hai:", error);
-        res.status(500).send("Server Error");
-    }
-};
-
-const getChangePasswordPage = (req, res) => {
-    const lang = getLanguage(req);
-    res.render('admin/change-password', {
-        layout: 'admin/layout',
-        pageTitle: 'Change Password',
-        lang,
-        error: null,
-        success: null
-    });
-};
-
-const postChangePassword = async (req, res) => {
-    const lang = getLanguage(req);
-    // (Password change ka logic waisa hi rahega)
-    try {
-        const { currentPassword, newPassword, confirmPassword } = req.body;
-        const userId = req.session.userId;
-        if (newPassword !== confirmPassword) {
-            return res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', lang, error: "New passwords do not match." });
-        }
-        const user = await User.findById(userId);
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', lang, error: "Incorrect current password." });
-        }
-        user.password = newPassword;
-        await user.save();
-        res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', lang, success: "Password changed successfully!" });
-    } catch (error) {
-        console.error("Password change karne mein masla hai:", error);
-        res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', lang, error: "An error occurred." });
-    }
-};
+const getAdminDashboard = async (req, res) => { try { const [studentCount, teacherCount, assignmentCount] = await Promise.all([ Student.countDocuments(), Teacher.countDocuments(), Assignment.countDocuments() ]); res.render('admin/dashboard', { layout: 'admin/layout', pageTitle: 'Admin Dashboard', studentCount, teacherCount, assignmentCount }); } catch (error) { console.error("Admin dashboard load karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const getChangePasswordPage = (req, res) => { res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', error: null, success: null }); };
+const postChangePassword = async (req, res) => { try { const { currentPassword, newPassword, confirmPassword } = req.body; const userId = req.session.userId; if (newPassword !== confirmPassword) { return res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', error: "New passwords do not match." }); } const user = await User.findById(userId); const isMatch = await bcrypt.compare(currentPassword, user.password); if (!isMatch) { return res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', error: "Incorrect current password." }); } user.password = newPassword; await user.save(); res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', success: "Password changed successfully!" }); } catch (error) { console.error("Password change karne mein masla hai:", error); res.render('admin/change-password', { layout: 'admin/layout', pageTitle: 'Change Password', error: "An error occurred." }); } };
 
 // =================================================================
-// STUDENT & OTHER MANAGEMENT
+// STUDENT MANAGEMENT
 // =================================================================
-const getStudentsPage = async (req, res) => {
-    const lang = getLanguage(req);
-    try {
-        const students = await Student.find({}).sort({ createdAt: -1 });
-        res.render('admin/students', { layout: 'admin/layout', pageTitle: 'Manage Students', students, lang });
-    } catch (error) {
-        console.error("Error loading students page:", error);
-        res.status(500).send("Server Error");
-    }
-};
+const getStudentsPage = async (req, res) => { try { const students = await Student.find({}).sort({ createdAt: -1 }); res.render('admin/students', { layout: 'admin/layout', pageTitle: 'Manage Students', students }); } catch (error) { console.error("Error loading students page:", error); res.status(500).send("Server Error"); } };
+const getAddStudentPage = (req, res) => res.render('admin/add-student', { layout: 'admin/layout', pageTitle: 'Add New Student' });
+const postAddStudent = async (req, res) => { try { await new Student(req.body).save(); res.redirect('/admin/students'); } catch (error) { console.error("Error adding student:", error); res.render('admin/add-student', { layout: 'admin/layout', pageTitle: 'Add New Student', error: "Could not add student." }); } };
+const getEditStudentPage = async (req, res) => { try { const student = await Student.findById(req.params.id); res.render('admin/edit-student', { layout: 'admin/layout', pageTitle: 'Edit Student', student }); } catch (error) { console.error("Error loading edit student page:", error); res.status(500).send("Server Error"); } };
+const postUpdateStudent = async (req, res) => { try { await Student.findByIdAndUpdate(req.params.id, req.body); res.redirect('/admin/students'); } catch (error) { console.error("Error updating student:", error); res.redirect(`/admin/students/edit/${req.params.id}`); } };
+const deleteStudent = async (req, res) => { try { await Student.findByIdAndDelete(req.params.id); res.redirect('/admin/students'); } catch (error) { console.error("Error deleting student:", error); res.redirect('/admin/students'); } };
 
-const getTeachersPage = async (req, res) => {
-    const lang = getLanguage(req);
-    try {
-        const teachers = await Teacher.find({}).sort({ createdAt: -1 });
-        res.render('admin/teachers', { layout: 'admin/layout', pageTitle: 'Manage Teachers', teachers, lang });
-    } catch (error) {
-        console.error("Error loading teachers page:", error);
-        res.status(500).send("Server Error");
-    }
-};
+// =================================================================
+// TEACHER MANAGEMENT
+// =================================================================
+const getTeachersPage = async (req, res) => { try { const teachers = await Teacher.find({}).sort({ createdAt: -1 }); res.render('admin/teachers', { layout: 'admin/layout', pageTitle: 'Manage Teachers', teachers }); } catch (error) { console.error("Error loading teachers page:", error); res.status(500).send("Server Error"); } };
+const getAddTeacherPage = (req, res) => res.render('admin/add-teacher', { layout: 'admin/layout', pageTitle: 'Add New Teacher' });
+const postAddTeacher = async (req, res) => { try { const { name_en, name_ur, subject_en, subject_ur, officeHours_en, officeHours_ur, photo } = req.body; await new Teacher({ name: { en: name_en, ur: name_ur }, subject: { en: subject_en, ur: subject_ur }, officeHours: { en: officeHours_en, ur: officeHours_ur }, photo }).save(); res.redirect('/admin/teachers'); } catch (error) { console.error("Error adding teacher:", error); res.render('admin/add-teacher', { layout: 'admin/layout', pageTitle: 'Add New Teacher', error: "Could not add teacher." }); } };
+const getEditTeacherPage = async (req, res) => { try { const teacher = await Teacher.findById(req.params.id); res.render('admin/edit-teacher', { layout: 'admin/layout', pageTitle: 'Edit Teacher', teacher }); } catch (error) { console.error("Error loading edit teacher page:", error); res.status(500).send("Server Error"); } };
+const postUpdateTeacher = async (req, res) => { try { const { name_en, name_ur, subject_en, subject_ur, officeHours_en, officeHours_ur, photo } = req.body; await Teacher.findByIdAndUpdate(req.params.id, { name: { en: name_en, ur: name_ur }, subject: { en: subject_en, ur: subject_ur }, officeHours: { en: officeHours_en, ur: officeHours_ur }, photo }); res.redirect('/admin/teachers'); } catch (error) { console.error("Error updating teacher:", error); res.redirect(`/admin/teachers/edit/${req.params.id}`); } };
+const deleteTeacher = async (req, res) => { try { await Teacher.findByIdAndDelete(req.params.id); res.redirect('/admin/teachers'); } catch (error) { console.error("Error deleting teacher:", error); res.redirect('/admin/teachers'); } };
 
-const getAssignmentsPage = async (req, res) => {
-    const lang = getLanguage(req);
-    try {
-        const assignments = await Assignment.find({}).sort({ dueDate: 1 });
-        res.render('admin/assignments', { layout: 'admin/layout', pageTitle: 'Manage Assignments', assignments, lang });
-    } catch (error) {
-        console.error("Error loading assignments page:", error);
-        res.status(500).send("Server Error");
-    }
-};
+// =================================================================
+// ASSIGNMENT MANAGEMENT
+// =================================================================
+const getAssignmentsPage = async (req, res) => { try { const assignments = await Assignment.find({}).sort({ dueDate: 1 }); res.render('admin/assignments', { layout: 'admin/layout', pageTitle: 'Manage Assignments', assignments }); } catch (error) { console.error("Error loading assignments page:", error); res.status(500).send("Server Error"); } };
+const getAddAssignmentPage = (req, res) => res.render('admin/add-assignment', { layout: 'admin/layout', pageTitle: 'Add New Assignment' });
+const postAddAssignment = async (req, res) => { try { const { subject_en, subject_ur, task_en, task_ur, dueDate, completed } = req.body; await new Assignment({ subject: { en: subject_en, ur: subject_ur }, task: { en: task_en, ur: task_ur }, dueDate, completed: completed === 'true' }).save(); res.redirect('/admin/assignments'); } catch (error) { console.error("Error adding assignment:", error); res.render('admin/add-assignment', { layout: 'admin/layout', pageTitle: 'Add New Assignment', error: "Could not add assignment." }); } };
+const getEditAssignmentPage = async (req, res) => { try { const assignment = await Assignment.findById(req.params.id); res.render('admin/edit-assignment', { layout: 'admin/layout', pageTitle: 'Edit Assignment', assignment }); } catch (error) { console.error("Error loading edit assignment page:", error); res.status(500).send("Server Error"); } };
+const postUpdateAssignment = async (req, res) => { try { const { subject_en, subject_ur, task_en, task_ur, dueDate, completed } = req.body; await Assignment.findByIdAndUpdate(req.params.id, { subject: { en: subject_en, ur: subject_ur }, task: { en: task_en, ur: task_ur }, dueDate, completed: completed === 'true' }); res.redirect('/admin/assignments'); } catch (error) { console.error("Error updating assignment:", error); res.redirect(`/admin/assignments/edit/${req.params.id}`); } };
+const deleteAssignment = async (req, res) => { try { await Assignment.findByIdAndDelete(req.params.id); res.redirect('/admin/assignments'); } catch (error) { console.error("Error deleting assignment:", error); res.redirect('/admin/assignments'); } };
 
-// Add/Edit/Delete functions ko abhi ke liye waisa hi rehne dein, hum unhein baad mein update kar sakte hain.
-const getAddStudentPage = (req, res) => res.render('admin/add-student', { layout: 'admin/layout', pageTitle: 'Add New Student', lang: getLanguage(req) });
-const postAddStudent = async (req, res) => { try { await new Student(req.body).save(); res.redirect('/admin/students'); } catch (error) { res.render('admin/add-student', { layout: 'admin/layout', pageTitle: 'Add New Student', lang: getLanguage(req), error: "Could not add student." }); } };
-const getEditStudentPage = async (req, res) => { try { const student = await Student.findById(req.params.id); res.render('admin/edit-student', { layout: 'admin/layout', pageTitle: 'Edit Student', student, lang: getLanguage(req) }); } catch (error) { res.status(500).send("Server Error"); } };
-const postUpdateStudent = async (req, res) => { try { await Student.findByIdAndUpdate(req.params.id, req.body); res.redirect('/admin/students'); } catch (error) { res.redirect(`/admin/students/edit/${req.params.id}`); } };
-const deleteStudent = async (req, res) => { try { await Student.findByIdAndDelete(req.params.id); res.redirect('/admin/students'); } catch (error) { res.redirect('/admin/students'); } };
-const getAddTeacherPage = (req, res) => res.render('admin/add-teacher', { layout: 'admin/layout', pageTitle: 'Add New Teacher', lang: getLanguage(req) });
-const postAddTeacher = async (req, res) => { try { const { name_en, name_ur, subject_en, subject_ur, officeHours_en, officeHours_ur, photo } = req.body; await new Teacher({ name: { en: name_en, ur: name_ur }, subject: { en: subject_en, ur: subject_ur }, officeHours: { en: officeHours_en, ur: officeHours_ur }, photo }).save(); res.redirect('/admin/teachers'); } catch (error) { res.render('admin/add-teacher', { layout: 'admin/layout', pageTitle: 'Add New Teacher', lang: getLanguage(req), error: "Could not add teacher." }); } };
-const getEditTeacherPage = async (req, res) => { try { const teacher = await Teacher.findById(req.params.id); res.render('admin/edit-teacher', { layout: 'admin/layout', pageTitle: 'Edit Teacher', teacher, lang: getLanguage(req) }); } catch (error) { res.status(500).send("Server Error"); } };
-const postUpdateTeacher = async (req, res) => { try { const { name_en, name_ur, subject_en, subject_ur, officeHours_en, officeHours_ur, photo } = req.body; await Teacher.findByIdAndUpdate(req.params.id, { name: { en: name_en, ur: name_ur }, subject: { en: subject_en, ur: subject_ur }, officeHours: { en: officeHours_en, ur: officeHours_ur }, photo }); res.redirect('/admin/teachers'); } catch (error) { res.redirect(`/admin/teachers/edit/${req.params.id}`); } };
-const deleteTeacher = async (req, res) => { try { await Teacher.findByIdAndDelete(req.params.id); res.redirect('/admin/teachers'); } catch (error) { res.redirect('/admin/teachers'); } };
-const getAddAssignmentPage = (req, res) => res.render('admin/add-assignment', { layout: 'admin/layout', pageTitle: 'Add New Assignment', lang: getLanguage(req) });
-const postAddAssignment = async (req, res) => { try { const { subject_en, subject_ur, task_en, task_ur, dueDate, completed } = req.body; await new Assignment({ subject: { en: subject_en, ur: subject_ur }, task: { en: task_en, ur: task_ur }, dueDate, completed: completed === 'true' }).save(); res.redirect('/admin/assignments'); } catch (error) { res.render('admin/add-assignment', { layout: 'admin/layout', pageTitle: 'Add New Assignment', lang: getLanguage(req), error: "Could not add assignment." }); } };
-const getEditAssignmentPage = async (req, res) => { try { const assignment = await Assignment.findById(req.params.id); res.render('admin/edit-assignment', { layout: 'admin/layout', pageTitle: 'Edit Assignment', assignment, lang: getLanguage(req) }); } catch (error) { res.status(500).send("Server Error"); } };
-const postUpdateAssignment = async (req, res) => { try { const { subject_en, subject_ur, task_en, task_ur, dueDate, completed } = req.body; await Assignment.findByIdAndUpdate(req.params.id, { subject: { en: subject_en, ur: subject_ur }, task: { en: task_en, ur: task_ur }, dueDate, completed: completed === 'true' }); res.redirect('/admin/assignments'); } catch (error) { res.redirect(`/admin/assignments/edit/${req.params.id}`); } };
-const deleteAssignment = async (req, res) => { try { await Assignment.findByIdAndDelete(req.params.id); res.redirect('/admin/assignments'); } catch (error) { res.redirect('/admin/assignments'); } };
+// =================================================================
+// NOTES MANAGEMENT
+// =================================================================
+const getNotesPage = async (req, res) => { try { const subjects = await SubjectNotes.find({}).sort({ 'subject.en': 1 }); res.render('admin/notes', { layout: 'admin/layout', pageTitle: 'Manage Notes', subjects, lang: req.query.lang || 'en' }); } catch (error) { console.error("Manage Notes page load karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const getAddNoteSubjectPage = (req, res) => res.render('admin/add-note-subject', { layout: 'admin/layout', pageTitle: 'Add New Subject Notes' });
+const postAddNoteSubject = async (req, res) => { try { const { subject_en, subject_ur, slug, note_title_en, note_title_ur, note_url, note_date } = req.body; const newSubject = new SubjectNotes({ slug, subject: { en: subject_en, ur: subject_ur }, notes: [{ title: { en: note_title_en, ur: note_title_ur }, url: note_url, date: note_date }] }); await newSubject.save(); res.redirect('/admin/notes'); } catch (error) { console.error("Subject add karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const getEditNoteSubjectPage = async (req, res) => { try { const subject = await SubjectNotes.findOne({ slug: req.params.slug }); res.render('admin/edit-note-subject', { layout: 'admin/layout', pageTitle: `Edit: ${subject.subject.en}`, subject }); } catch (error) { console.error("Edit Note Subject page load karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const postAddNoteToSubject = async (req, res) => { try { const subject = await SubjectNotes.findOne({ slug: req.params.slug }); subject.notes.push({ title: { en: req.body.note_title_en, ur: req.body.note_title_ur }, url: req.body.note_url, date: req.body.note_date }); await subject.save(); res.redirect(`/admin/notes/edit/${req.params.slug}`); } catch (error) { console.error("Note add karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const deleteNoteFromSubject = async (req, res) => { try { await SubjectNotes.updateOne({ slug: req.params.slug }, { $pull: { notes: { _id: req.params.noteId } } }); res.redirect(`/admin/notes/edit/${req.params.slug}`); } catch (error) { console.error("Note delete karne mein masla hai:", error); res.status(500).send("Server Error"); } };
+const deleteSubject = async (req, res) => { try { await SubjectNotes.findByIdAndDelete(req.params.id); res.redirect('/admin/notes'); } catch (error) { console.error("Subject delete karne mein masla hai:", error); res.status(500).send("Server Error"); } };
 
 module.exports = {
     getAdminDashboard, getChangePasswordPage, postChangePassword,
     getStudentsPage, getAddStudentPage, postAddStudent, getEditStudentPage, postUpdateStudent, deleteStudent,
-    getTeachersPage, getAddTeacherPage, postAddTeacher, getEditTeacherPage, postUpdateTeacher, deleteTeacher,
-    getAssignmentsPage, getAddAssignmentPage, postAddAssignment, getEditAssignmentPage, postUpdateAssignment, deleteAssignment
+    getTeachersPage, getAddTeacherPage, postAddTeacher, getEditTeacherPage, postUpdateStudent, deleteTeacher,
+    getAssignmentsPage, getAddAssignmentPage, postAddAssignment, getEditAssignmentPage, postUpdateAssignment, deleteAssignment,
+    getNotesPage, getAddNoteSubjectPage, postAddNoteSubject, getEditNoteSubjectPage, postAddNoteToSubject, deleteNoteFromSubject, deleteSubject
 };
