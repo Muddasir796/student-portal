@@ -1,0 +1,43 @@
+<%# views/admin/add-note-subject.ejs %>
+
+<div class="page-header">
+    <h2 class="page-title"><%= pageTitle %></h2>
+</div>
+
+<div class="card">
+    <form action="/admin/notes/add-subject" method="POST" class="form">
+        
+        <h3 class="form-section-title">Subject Details</h3>
+        <div class="form-group">
+            <label for="subjectEn">Subject Name (English)</label>
+            <input type="text" id="subjectEn" name="subjectEn" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="subjectUr">Subject Name (Urdu)</label>
+            <input type="text" id="subjectUr" name="subjectUr" class="form-control" required dir="rtl">
+        </div>
+
+        <hr style="margin: 2rem 0;">
+
+        <h3 class="form-section-title">First Note Details</h3>
+        <p class="form-section-description">Every subject must have at least one note to begin with.</p>
+        
+        <div class="form-group">
+            <label for="titleEn">Note Title (English)</label>
+            <input type="text" id="titleEn" name="titleEn" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="titleUr">Note Title (Urdu)</label>
+            <input type="text" id="titleUr" name="titleUr" class="form-control" required dir="rtl">
+        </div>
+        <div class="form-group">
+            <label for="url">Note URL</label>
+            <input type="url" id="url" name="url" class="form-control" required placeholder="https://example.com/note.pdf">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Subject</button>
+            <a href="/admin/notes" class="btn" style="background-color: #e5e7eb;">Cancel</a>
+        </div>
+    </form>
+</div>
