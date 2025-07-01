@@ -42,13 +42,15 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- MIDDLEWARE ---
-// 1. Cookie Parser ko hamari aam (common) secret key ke sath initialize karein
+// --- MIDDLEWARE (ORDER FIXED) ---
+// Middleware ki tartib bohat zaroori hai.
+
+// 1. Cookie Parser sab se pehle
 app.use(cookieParser(COOKIE_AND_CSRF_SECRET)); 
 
-// 2. Session Middleware
+// 2. Session Middleware uske baad (CSRF ispar depend karta hai)
 app.use(session({
-    secret: COOKIE_AND_CSRF_SECRET, // Session ke liye bhi wohi secret istemal karein
+    secret: COOKIE_AND_CSRF_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -62,18 +64,18 @@ app.use(session({
     })
 }));
 
-// 3. CSRF Protection Middleware
-// Isay bhi wohi aam (common) secret key dein
+// 3. Flash Middleware session ke baad
+app.use(flash());
+
+// 4. CSRF Protection Middleware session aur cookie ke baad
 app.use(csrf(
     COOKIE_AND_CSRF_SECRET, 
     ['POST'],
     []
 ));
 
-// 4. Flash Message Middleware
-app.use(flash());
-
-// 5. Custom middleware to make CSRF token available to all views
+// 5. Custom middleware to make CSRF token and flash messages available to all views
+// Yeh hamesha CSRF aur Flash ke baad aana chahiye
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
