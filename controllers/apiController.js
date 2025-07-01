@@ -1,23 +1,20 @@
 // controllers/apiController.js
+const { validationResult } = require('express-validator');
+const asyncHandler = require('../utils/asyncHandler');
+const Feedback = require('../models/Feedback');
 
-const Feedback = require('../models/Feedback.js');
-
-// Feedback submit karne ka logic
-const submitFeedback = async (req, res) => {
-    try {
-        // Validation ab middleware mein ho rahi hai.
-        const { message } = req.body;
-
-        const newFeedback = new Feedback({ message });
-        await newFeedback.save();
-
-        res.status(201).json({ success: true, message: 'Feedback submitted successfully!' });
-
-    } catch (error) {
-        console.error('Feedback submission mein masla hai:', error);
-        res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
+const submitFeedback = asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
-};
+
+    const { name, email, message } = req.body;
+
+    await Feedback.create({ name, email, message });
+
+    res.status(201).json({ success: true, message: 'Thank you for your feedback! It has been received.' });
+});
 
 module.exports = {
     submitFeedback,

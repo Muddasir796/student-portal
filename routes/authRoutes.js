@@ -7,7 +7,7 @@ const router = express.Router();
 const { renderLoginPage, loginUser, logoutUser } = require('../controllers/authController.js');
 const { loginLimiter } = require('../middleware/rateLimiter.js');
 const { isLoggedIn } = require('../middleware/authMiddleware.js');
-const { loginValidationRules } = require('../middleware/validationMiddleware.js');
+const { loginValidationRules } = require('../middleware/adminValidationMiddleware.js');
 
 // Jab '/login' par GET request aaye, to login page dikhao
 router.get('/login', renderLoginPage);

@@ -3,12 +3,12 @@
 const express = require('express');
 const router = express.Router();
 
-// Controller aur naye Middleware ko import karein
+// API Controller se 'submitFeedback' function import karein
 const { submitFeedback } = require('../controllers/apiController.js');
-const { validateFeedback } = require('../middleware/apiValidationMiddleware.js');
+const { feedbackValidationRules } = require('../middleware/apiValidationMiddleware.js');
 
-// Route: /api/feedback
-// Pehle 'validateFeedback' middleware chalega, agar woh pass hoga tab hi 'submitFeedback' chalega.
-router.post('/feedback', validateFeedback, submitFeedback);
+// Jab is route par POST request aaye, to submitFeedback function chalao
+// Poora URL banega: /api/feedback
+router.post('/feedback', feedbackValidationRules(), submitFeedback);
 
 module.exports = router;

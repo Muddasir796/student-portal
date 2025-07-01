@@ -11,7 +11,7 @@
                     <h2 class="accordion-header" id="heading-<%= subject.slug %>">
                         <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= subject.slug %>" aria-expanded="<%= index === 0 ? 'true' : 'false' %>" aria-controls="collapse-<%= subject.slug %>">
                             <%= subject.subject[lang] || subject.subject.en %>
-                            <span class="badge bg-primary rounded-pill ms-auto me-3"><%= subject.notes.length %> Notes</span>
+                            <span class="badge bg-primary rounded-pill ms-auto me-3"><%= subject.notes.length %> <%= subject.notes.length === 1 ? 'Note' : 'Notes' %></span>
                         </button>
                     </h2>
                     <div id="collapse-<%= subject.slug %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" aria-labelledby="heading-<%= subject.slug %>" data-bs-parent="#notesAccordion">
@@ -36,10 +36,8 @@
             <% }); %>
         </div>
     <% } else { %>
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <p class="mb-0">Course notes are being organized and will be available soon.</p>
-            </div>
+        <div class="alert alert-info text-center">
+            <p class="mb-0">Course notes are being organized and will be available soon.</p>
         </div>
     <% } %>
 </div>

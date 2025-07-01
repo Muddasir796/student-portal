@@ -27,6 +27,11 @@ const studentValidationRules = () => {
             .trim()
             .notEmpty()
             .escape(),
+
+        body('birthday')
+            .optional({ checkFalsy: true })
+            .isISO8601().withMessage('Please enter a valid date.')
+            .toDate(),
     ];
 };
 
@@ -75,11 +80,6 @@ const assignmentValidationRules = () => {
             .trim()
             .notEmpty()
             .escape(),
-
-        body('birthday')
-            .optional({ checkFalsy: true })
-            .isISO8601().withMessage('Please enter a valid date.')
-            .toDate(),
     ];
 };
 
@@ -160,6 +160,13 @@ const quizQuestionValidationRules = () => {
     ];
 };
 
+const loginValidationRules = () => {
+    return [
+        body('username', 'Username is required.').notEmpty(),
+        body('password', 'Password is required.').notEmpty(),
+    ];
+};
+
 module.exports = {
     studentValidationRules,
     teacherValidationRules,
@@ -170,4 +177,5 @@ module.exports = {
     downloadValidationRules,
     galleryValidationRules,
     quizQuestionValidationRules,
+    loginValidationRules,
 };
