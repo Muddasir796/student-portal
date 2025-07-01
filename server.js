@@ -1,15 +1,15 @@
-// server.js (Final version with Render Port and CSRF Fix)
+// server.js (Final version with all fixes)
 
 const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo'); // Session store ke liye
-const session = require('express-session');
-const cookieParser = require('cookie-parser'); // CSRF ke liye zaroori
-const csrf = require('tiny-csrf'); // CSRF protection ke liye
-const flash = require('connect-flash'); // Flash messages ke liye
-const helmet = require('helmet'); // Security ke liye
-const morgan = require('morgan'); // Request logging ke liye
+const MongoStore = require('connect-mongo');
+const session = 'express-session';
+const cookieParser = require('cookie-parser');
+const csrf = require('tiny-csrf');
+const flash = require('connect-flash');
+const helmet = require('helmet');
+const morgan = require('morgan');
 require('dotenv').config();
 
 // --- Custom Middleware Import ---
@@ -22,8 +22,10 @@ const authRoutes = require('./routes/authRoutes.js');
 const adminRoutes = require('./routes/adminRoutes.js');
 
 const app = express();
-// FIX: Render se anay wala port istemal karein, ya agar local hai to 3000.
 const PORT = process.env.PORT || 3000;
+
+// --- YEH SECRET KEY AB DONO JAGAH ISTEMAL HOGI ---
+const COOKIE_AND_CSRF_SECRET = 'a_very_secure_32_character_long_secret_key';
 
 // --- Database Connection ---
 mongoose.connect(process.env.MONGODB_URI)
@@ -31,10 +33,7 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.error('Database connection mein masla hai:', err));
 
 // --- Core Middleware ---
-// Security Headers
 app.use(helmet());
-
-// Development mein request logging
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
@@ -43,44 +42,43 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Cookie Parser ko session ke secret ke sath initialize karein
-// Agar SESSION_SECRET na ho to local development ke liye ek fallback istemal karein
-app.use(cookieParser(process.env.SESSION_SECRET || 'a-32-character-long-dev-secret!!')); 
+// --- MIDDLEWARE FIX ---
+// 1. Cookie Parser ko hamari aam (common) secret key ke sath initialize karein
+app.use(cookieParser(COOKIE_AND_CSRF_SECRET)); 
 
+// 2. Session Middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'a-32-character-long-dev-secret!!', // .env se secret istemal karein
+    secret: COOKIE_AND_CSRF_SECRET, // Session ke liye bhi wohi secret istemal karein
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production', // Production mein secure cookies
-        httpOnly: true, // Cross-site scripting (XSS) se bachao
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 
     },
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URI,
-        collectionName: 'sessions' // Database mein sessions collection ka naam
+        collectionName: 'sessions'
     })
 }));
 
-// --- CSRF Protection Middleware (FIXED) ---
-// Hum yahan ek dedicated, 32-character secret key direct istemal kar rahe hain
-// taake Render ke environment variable ka masla na ho.
-const csrfSecret = 'ec5e997af58ab46702f740efb3161dc7'; // YEH 32 CHARACTERS HAIN
+// 3. CSRF Protection Middleware
+// Isay bhi wohi aam (common) secret key dein
 app.use(csrf(
-    csrfSecret, // Secret key direct yahan pass karein
-    ['POST'],   // Sirf POST requests ko protect karein
-    []          // Exceptions (agar koi hon)
+    COOKIE_AND_CSRF_SECRET, 
+    ['POST'],
+    []
 ));
 
+// 4. Flash Message Middleware
+app.use(flash());
 
-// --- Flash Message Middleware ---
-app.use(flash()); // Flash ko initialize karein
-
-// Custom middleware taake flash messages aur CSRF token tamam views mein available hon
+// 5. Custom middleware to make CSRF token available to all views
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-    // CSRF token ko locals mein daalein taake har form mein istemal ho sake
+    
+    // Yeh EJS mein 'csrfToken' variable banata hai
     if (req.csrfToken) {
         res.locals.csrfToken = req.csrfToken();
     }
@@ -99,9 +97,8 @@ app.use('/admin', adminRoutes);
 app.use('/', pageRoutes);
 
 // --- Error Handling Middleware ---
-// Yeh hamesha routes ke baad anay chahiye
-app.use(notFoundHandler); // 404 errors ke liye
-app.use(errorHandler); // Tamam doosre errors ke liye
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 
 // --- Server Start ---
