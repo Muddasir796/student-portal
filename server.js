@@ -42,7 +42,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.COOKIE_SECRET || 'default-cookie-secret')); // Cookie secret .env se lein
+app.use(cookieParser(process.env.SESSION_SECRET || 'a-32-character-long-dev-secret')); // CSRF ke liye bhi session secret istemal karein
 
 app.use(session({
     secret: process.env.SESSION_SECRET, // .env se secret istemal karein
