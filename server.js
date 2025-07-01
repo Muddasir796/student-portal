@@ -4,7 +4,7 @@ const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
-const session = 'express-session';
+const session = require('express-session'); // <-- YEH LINE THEEK KAR DI GAYI HAI
 const cookieParser = require('cookie-parser');
 const csrf = require('tiny-csrf');
 const flash = require('connect-flash');
@@ -24,7 +24,7 @@ const adminRoutes = require('./routes/adminRoutes.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- YEH SECRET KEY AB DONO JAGAH ISTEMAL HOGI ---
+// --- Yeh secret key ab dono jagah istemal hogi ---
 const COOKIE_AND_CSRF_SECRET = 'a_very_secure_32_character_long_secret_key';
 
 // --- Database Connection ---
@@ -42,7 +42,7 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- MIDDLEWARE FIX ---
+// --- MIDDLEWARE ---
 // 1. Cookie Parser ko hamari aam (common) secret key ke sath initialize karein
 app.use(cookieParser(COOKIE_AND_CSRF_SECRET)); 
 
