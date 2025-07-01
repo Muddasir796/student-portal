@@ -4,7 +4,7 @@ const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
-const session = require('express-session'); // <-- YEH LINE THEEK KAR DI GAYI HAI
+const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const csrf = require('tiny-csrf');
 const flash = require('connect-flash');
@@ -24,8 +24,8 @@ const adminRoutes = require('./routes/adminRoutes.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Yeh secret key ab dono jagah istemal hogi ---
-const COOKIE_AND_CSRF_SECRET = 'a_very_secure_32_character_long_secret_key';
+// --- YEH SECRET KEY AB 100% THEEK HAI (32 CHARACTERS) ---
+const COOKIE_AND_CSRF_SECRET = 'abf8e7d6c5b4a39281706f5e4d3c2b1a';
 
 // --- Database Connection ---
 mongoose.connect(process.env.MONGODB_URI)
