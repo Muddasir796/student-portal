@@ -3,6 +3,7 @@
 const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo'); // Session store ke liye
 const session = require('express-session');
 const cookieParser = require('cookie-parser'); // CSRF ke liye zaroori
 const csrf = require('tiny-csrf'); // CSRF protection ke liye
@@ -51,7 +52,11 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production', // Production mein secure cookies
         httpOnly: true, // Cross-site scripting (XSS) se bachao
         maxAge: 1000 * 60 * 60 * 24 
-    }
+    },
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions' // Database mein sessions collection ka naam
+    })
 }));
 
 // --- CSRF Protection Middleware ---
