@@ -26,9 +26,7 @@
                         </a>
                         <h1 class="h3 mb-3 fw-normal" style="color: var(--primary-green);">Admin Panel Login</h1>
                     </div>
-
-                    <%- include('../partials/messages') %>
-
+                    <%- include('partials/messages') %>
                     <form action="/login" method="POST" novalidate>
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
