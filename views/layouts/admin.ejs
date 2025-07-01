@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - BSIS Portal</title>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        /* Simple sidebar transition */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex h-screen bg-gray-200">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-gray-800 text-white flex flex-col fixed h-full z-20">
+            <div class="px-6 py-4 border-b border-gray-700">
+                <h2 class="text-xl font-semibold">Admin Panel</h2>
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-2">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+                </a>
+                <a href="/admin/students" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-user-graduate mr-3"></i> Students
+                </a>
+                <a href="/admin/teachers" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-chalkboard-teacher mr-3"></i> Teachers
+                </a>
+                <a href="/admin/courses" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-book mr-3"></i> Courses
+                </a>
+                 <a href="/admin/attendance" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-user-check mr-3"></i> Attendance
+                </a>
+                <a href="/admin/settings" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-cog mr-3"></i> Settings
+                </a>
+            </nav>
+            <div class="px-6 py-4 border-t border-gray-700">
+                <a href="/logout" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col ml-64">
+            <!-- Header -->
+            <header class="bg-white shadow-md p-4 flex justify-between items-center">
+                <div>
+                    <button id="menu-button" class="text-gray-500 focus:outline-none lg:hidden">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-700 hidden lg:block">Welcome, Admin!</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600">Muddasir</span>
+                    <img class="h-10 w-10 rounded-full object-cover" src="/images/default-avatar.png" alt="Admin Avatar">
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6">
+                 <!-- Flash Messages -->
+                <%- include('../partials/messages') %>
+                
+                <!-- Yeh line aapke har admin page ka content yahan daal degi -->
+                <%- body %>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const menuButton = document.getElementById('menu-button');
+
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+    </script>
+
+</body>
+</html>
