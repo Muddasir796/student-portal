@@ -1,4 +1,4 @@
-// server.js (Final version with all fixes)
+// server.js (Final version with all fixes including trust proxy)
 
 const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
@@ -24,7 +24,11 @@ const adminRoutes = require('./routes/adminRoutes.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- YEH SECRET KEY AB 100% THEEK HAI (32 CHARACTERS) ---
+// --- YEH NAINA FIX ADD KIYA GAYA HAI ---
+// Render ke proxy par bharosa karne ke liye yeh line zaroori hai
+app.set('trust proxy', 1); 
+
+// --- Secret Key ---
 const COOKIE_AND_CSRF_SECRET = 'abf8e7d6c5b4a39281706f5e4d3c2b1a';
 
 // --- Database Connection ---
@@ -42,13 +46,8 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- MIDDLEWARE (ORDER FIXED) ---
-// Middleware ki tartib bohat zaroori hai.
-
-// 1. Cookie Parser sab se pehle
+// --- Middleware (Correct Order) ---
 app.use(cookieParser(COOKIE_AND_CSRF_SECRET)); 
-
-// 2. Session Middleware uske baad (CSRF ispar depend karta hai)
 app.use(session({
     secret: COOKIE_AND_CSRF_SECRET,
     resave: false,
@@ -63,24 +62,16 @@ app.use(session({
         collectionName: 'sessions'
     })
 }));
-
-// 3. Flash Middleware session ke baad
 app.use(flash());
-
-// 4. CSRF Protection Middleware session aur cookie ke baad
 app.use(csrf(
     COOKIE_AND_CSRF_SECRET, 
     ['POST'],
     []
 ));
 
-// 5. Custom middleware to make CSRF token and flash messages available to all views
-// Yeh hamesha CSRF aur Flash ke baad aana chahiye
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-    
-    // Yeh EJS mein 'csrfToken' variable banata hai
     if (req.csrfToken) {
         res.locals.csrfToken = req.csrfToken();
     }
@@ -91,7 +82,6 @@ app.use((req, res, next) => {
 app.use(ejsLayouts);
 app.set('view engine', 'ejs');
 
-
 // --- Application Routes ---
 app.use('/api', apiRoutes); 
 app.use('/', authRoutes);
@@ -101,7 +91,6 @@ app.use('/', pageRoutes);
 // --- Error Handling Middleware ---
 app.use(notFoundHandler);
 app.use(errorHandler);
-
 
 // --- Server Start ---
 app.listen(PORT, () => {
