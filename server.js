@@ -1,4 +1,8 @@
-// server.js (Final version with all fixes including trust proxy)
+// server.js (Final version with csurf library)
+
+// Zaroori Note: Is code ko chalanay se pehle, aapko terminal mein yeh commands chalani hongi:
+// npm uninstall tiny-csrf
+// npm install csurf
 
 const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
@@ -6,7 +10,7 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const csrf = require('tiny-csrf');
+const csurf = require('csurf'); // Hum ab 'csurf' direct istemal kar rahe hain
 const flash = require('connect-flash');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -24,12 +28,11 @@ const adminRoutes = require('./routes/adminRoutes.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- YEH NAINA FIX ADD KIYA GAYA HAI ---
-// Render ke proxy par bharosa karne ke liye yeh line zaroori hai
+// Render ke proxy par bharosa karne ke liye
 app.set('trust proxy', 1); 
 
 // --- Secret Key ---
-const COOKIE_AND_CSRF_SECRET = 'abf8e7d6c5b4a39281706f5e4d3c2b1a';
+const COOKIE_SECRET = 'abf8e7d6c5b4a39281706f5e4d3c2b1a';
 
 // --- Database Connection ---
 mongoose.connect(process.env.MONGODB_URI)
@@ -41,15 +44,14 @@ app.use(helmet());
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
-
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --- Middleware (Correct Order) ---
-app.use(cookieParser(COOKIE_AND_CSRF_SECRET)); 
+app.use(cookieParser(COOKIE_SECRET)); 
 app.use(session({
-    secret: COOKIE_AND_CSRF_SECRET,
+    secret: COOKIE_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -63,18 +65,18 @@ app.use(session({
     })
 }));
 app.use(flash());
-app.use(csrf(
-    COOKIE_AND_CSRF_SECRET, 
-    ['POST'],
-    []
-));
 
+// --- CSRF Protection (Naya Tareeqa) ---
+// Hum ab 'csurf' middleware ko yahan initialize kar rahe hain
+const csrfProtection = csurf();
+app.use(csrfProtection);
+
+// Custom middleware to make flash messages and CSRF token available to all views
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-    if (req.csrfToken) {
-        res.locals.csrfToken = req.csrfToken();
-    }
+    // 'csurf' yeh function 'req' object mein daal deta hai
+    res.locals.csrfToken = req.csrfToken();
     next();
 });
 
