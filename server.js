@@ -1,4 +1,4 @@
-// server.js (Final version with Render Port Fix)
+// server.js (Final version with Render Port and CSRF Fix)
 
 const express = require('express');
 const ejsLayouts = require('express-ejs-layouts');
@@ -42,10 +42,13 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.SESSION_SECRET || 'a-32-character-long-dev-secret')); // CSRF ke liye bhi session secret istemal karein
+
+// Cookie Parser ko session ke secret ke sath initialize karein
+// Agar SESSION_SECRET na ho to local development ke liye ek fallback istemal karein
+app.use(cookieParser(process.env.SESSION_SECRET || 'a-32-character-long-dev-secret!!')); 
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // .env se secret istemal karein
+    secret: process.env.SESSION_SECRET || 'a-32-character-long-dev-secret!!', // .env se secret istemal karein
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -59,15 +62,16 @@ app.use(session({
     })
 }));
 
-// --- CSRF Protection Middleware ---
-// Yeh hamesha session aur urlencoded ke baad aana chahiye.
-app.use(csrf({
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict', // Sab se mehfooz option
-        httpOnly: true,
-    }
-}));
+// --- CSRF Protection Middleware (FIXED) ---
+// Hum yahan ek dedicated, 32-character secret key direct istemal kar rahe hain
+// taake Render ke environment variable ka masla na ho.
+const csrfSecret = 'ec5e997af58ab46702f740efb3161dc7'; // YEH 32 CHARACTERS HAIN
+app.use(csrf(
+    csrfSecret, // Secret key direct yahan pass karein
+    ['POST'],   // Sirf POST requests ko protect karein
+    []          // Exceptions (agar koi hon)
+));
+
 
 // --- Flash Message Middleware ---
 app.use(flash()); // Flash ko initialize karein
