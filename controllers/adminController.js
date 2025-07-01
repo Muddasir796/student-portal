@@ -18,6 +18,25 @@ const Feedback = require('../models/Feedback');
 // Helper function to get language from request
 const getLanguage = (req) => req.query.lang === 'ur' ? 'ur' : 'en';
 
+// --- File Handling Helpers ---
+
+// Helper to normalize uploaded file path for web access
+const normalizePath = (filePath) => {
+    if (!filePath) return null;
+    return filePath.replace('public', '').replace(/\\/g, "/");
+};
+
+// Helper to safely delete a file, ignoring default/non-existent files
+const deleteFile = (filePath) => {
+    if (!filePath || filePath.includes('default-avatar.png')) return;
+    const fullPath = path.join(__dirname, '..', 'public', filePath);
+    fs.unlink(fullPath, (err) => {
+        if (err && err.code !== 'ENOENT') { // Ignore 'file not found' errors
+            console.error(`Error deleting file ${fullPath}:`, err);
+        }
+    });
+};
+
 // ADMIN DASHBOARD & PROFILE
 const getAdminDashboard = asyncHandler(async (req, res) => {
     const studentCount = await Student.countDocuments();
@@ -152,8 +171,7 @@ const postAddStudent = asyncHandler(async (req, res) => {
 
     const newStudentData = { name, rollNumber, class: studentClass, contact, address, birthday };
     if (req.file) {
-        // Path ko web-accessible banayein (public folder ko hata kar) aur backslashes ko forward slashes se replace karein
-        newStudentData.profileImage = req.file.path.replace('public', '').replace(/\\/g, "/");
+        newStudentData.profileImage = normalizePath(req.file.path);
     }
 
     await Student.create(newStudentData);
@@ -225,13 +243,8 @@ const postUpdateStudent = asyncHandler(async (req, res) => {
 
     if (req.file) {
         // Delete old image if it's not the default one
-        if (student.profileImage && student.profileImage !== '/images/default-avatar.png') {
-            const oldImagePath = path.join(__dirname, '..', 'public', student.profileImage);
-            fs.unlink(oldImagePath, (err) => {
-                if (err) console.error("Purani image delete karne mein masla:", err);
-            });
-        }
-        student.profileImage = req.file.path.replace('public', '').replace(/\\/g, "/");
+        deleteFile(student.profileImage);
+        student.profileImage = normalizePath(req.file.path);
     }
 
     await student.save();
@@ -243,12 +256,7 @@ const deleteStudent = asyncHandler(async (req, res) => {
     const student = await Student.findById(req.params.id);
     if (student) {
         // Delete profile image from server if it's not the default one
-        if (student.profileImage && student.profileImage !== '/images/default-avatar.png') {
-            const imagePath = path.join(__dirname, '..', 'public', student.profileImage);
-            fs.unlink(imagePath, (err) => {
-                if (err) console.error("Image delete karne mein masla:", err);
-            });
-        }
+        deleteFile(student.profileImage);
         await Student.deleteOne({ _id: req.params.id });
         req.flash('success_msg', 'Student kamyabi se delete ho gaya hai.');
     } else {
@@ -299,7 +307,7 @@ const postAddTeacher = asyncHandler(async (req, res) => {
     const newTeacherData = { name, designation, subject, contact };
 
     if (req.file) {
-        newTeacherData.profileImage = req.file.path.replace('public', '').replace(/\\/g, "/");
+        newTeacherData.profileImage = normalizePath(req.file.path);
     }
 
     await Teacher.create(newTeacherData);
@@ -356,13 +364,8 @@ const postUpdateTeacher = asyncHandler(async (req, res) => {
 
     if (req.file) {
         // Delete old image if it's not the default one
-        if (teacher.profileImage && teacher.profileImage !== '/images/default-avatar.png') {
-            const oldImagePath = path.join(__dirname, '..', 'public', teacher.profileImage);
-            fs.unlink(oldImagePath, (err) => {
-                if (err) console.error("Purani image delete karne mein masla:", err);
-            });
-        }
-        teacher.profileImage = req.file.path.replace('public', '').replace(/\\/g, "/");
+        deleteFile(teacher.profileImage);
+        teacher.profileImage = normalizePath(req.file.path);
     }
 
     await teacher.save();
@@ -374,12 +377,7 @@ const deleteTeacher = asyncHandler(async (req, res) => {
     const teacher = await Teacher.findById(req.params.id);
     if (teacher) {
         // Delete profile image from server if it's not the default one
-        if (teacher.profileImage && teacher.profileImage !== '/images/default-avatar.png') {
-            const imagePath = path.join(__dirname, '..', 'public', teacher.profileImage);
-            fs.unlink(imagePath, (err) => {
-                if (err) console.error("Image delete karne mein masla:", err);
-            });
-        }
+        deleteFile(teacher.profileImage);
         await Teacher.deleteOne({ _id: req.params.id });
         req.flash('success_msg', 'Teacher kamyabi se delete ho gaya hai.');
     } else {
@@ -435,7 +433,7 @@ const postAddAssignment = asyncHandler(async (req, res) => {
     };
 
     if (req.file) {
-        newAssignmentData.file = req.file.path.replace('public', '').replace(/\\/g, "/");
+        newAssignmentData.file = normalizePath(req.file.path);
     }
 
     await Assignment.create(newAssignmentData);
@@ -492,13 +490,8 @@ const postUpdateAssignment = asyncHandler(async (req, res) => {
 
     if (req.file) {
         // Delete the old file if it exists
-        if (assignment.file) {
-            const oldFilePath = path.join(__dirname, '..', 'public', assignment.file);
-            fs.unlink(oldFilePath, (err) => {
-                if (err) console.error("Purani assignment file delete karne mein masla:", err);
-            });
-        }
-        assignment.file = req.file.path.replace('public', '').replace(/\\/g, "/");
+        deleteFile(assignment.file);
+        assignment.file = normalizePath(req.file.path);
     }
 
     await assignment.save();
@@ -510,12 +503,7 @@ const deleteAssignment = asyncHandler(async (req, res) => {
     const assignment = await Assignment.findById(req.params.id);
     if (assignment) {
         // Delete the attachment file if it exists
-        if (assignment.file) {
-            const filePath = path.join(__dirname, '..', 'public', assignment.file);
-            fs.unlink(filePath, (err) => {
-                if (err) console.error("Assignment file delete karne mein masla:", err);
-            });
-        }
+        deleteFile(assignment.file);
         await Assignment.deleteOne({ _id: req.params.id });
         req.flash('success_msg', 'Assignment kamyabi se delete ho gaya hai.');
     } else {
@@ -690,10 +678,17 @@ const getAddDownloadPage = (req, res) => {
 
 const postAddDownload = asyncHandler(async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty() || !req.file) {
-        if (!req.file) {
-            errors.array().push({ path: 'file', msg: 'File upload karna zaroori hai.' });
-        }
+    if (!req.file) {
+        // Manually add a file error to the validation result object
+        errors.errors.push({
+            type: 'field',
+            msg: 'File upload karna zaroori hai.',
+            path: 'file',
+            location: 'body'
+        });
+    }
+
+    if (!errors.isEmpty()) {
         req.flash('validation_errors', errors.array());
         req.flash('old_input', req.body);
         return res.redirect('/admin/downloads/add');
@@ -703,7 +698,7 @@ const postAddDownload = asyncHandler(async (req, res) => {
     await Download.create({
         title: { en: title_en, ur: title_ur },
         category,
-        file: req.file.path.replace('public', '').replace(/\\/g, "/")
+        file: normalizePath(req.file.path)
     });
 
     req.flash('success_msg', 'File has been uploaded successfully.');
@@ -737,10 +732,8 @@ const postUpdateDownload = asyncHandler(async (req, res) => {
     download.category = category;
 
     if (req.file) {
-        fs.unlink(path.join(__dirname, '..', 'public', download.file), (err) => {
-            if (err) console.error("Old download file delete karne mein masla:", err);
-        });
-        download.file = req.file.path.replace('public', '').replace(/\\/g, "/");
+        deleteFile(download.file);
+        download.file = normalizePath(req.file.path);
     }
 
     await download.save();
@@ -751,9 +744,7 @@ const postUpdateDownload = asyncHandler(async (req, res) => {
 const deleteDownload = asyncHandler(async (req, res) => {
     const download = await Download.findByIdAndDelete(req.params.id);
     if (download && download.file) {
-        fs.unlink(path.join(__dirname, '..', 'public', download.file), (err) => {
-            if (err) console.error("Download file delete karne mein masla:", err);
-        });
+        deleteFile(download.file);
     }
     req.flash('success_msg', 'File has been deleted successfully.');
     res.redirect('/admin/downloads');
@@ -791,10 +782,16 @@ const getAddGalleryImagePage = (req, res) => {
 
 const postAddGalleryImage = asyncHandler(async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty() || !req.file) {
-        if (!req.file) {
-            errors.array().push({ path: 'image', msg: 'Image upload karna zaroori hai.' });
-        }
+    if (!req.file) {
+        // Manually add a file error to the validation result object
+        errors.errors.push({
+            type: 'field',
+            msg: 'Image upload karna zaroori hai.',
+            path: 'image',
+            location: 'body'
+        });
+    }
+    if (!errors.isEmpty()) {
         req.flash('validation_errors', errors.array());
         req.flash('old_input', req.body);
         return res.redirect('/admin/gallery/add');
@@ -804,7 +801,7 @@ const postAddGalleryImage = asyncHandler(async (req, res) => {
     await Gallery.create({
         title: { en: title_en, ur: title_ur },
         category,
-        image: req.file.path.replace('public', '').replace(/\\/g, "/")
+        image: normalizePath(req.file.path)
     });
 
     req.flash('success_msg', 'Image has been uploaded to the gallery successfully.');
@@ -838,10 +835,8 @@ const postUpdateGalleryImage = asyncHandler(async (req, res) => {
     image.category = category;
 
     if (req.file) {
-        fs.unlink(path.join(__dirname, '..', 'public', image.image), (err) => {
-            if (err) console.error("Old gallery image delete karne mein masla:", err);
-        });
-        image.image = req.file.path.replace('public', '').replace(/\\/g, "/");
+        deleteFile(image.image);
+        image.image = normalizePath(req.file.path);
     }
 
     await image.save();
@@ -852,9 +847,7 @@ const postUpdateGalleryImage = asyncHandler(async (req, res) => {
 const deleteGalleryImage = asyncHandler(async (req, res) => {
     const image = await Gallery.findByIdAndDelete(req.params.id);
     if (image && image.image) {
-        fs.unlink(path.join(__dirname, '..', 'public', image.image), (err) => {
-            if (err) console.error("Gallery image delete karne mein masla:", err);
-        });
+        deleteFile(image.image);
     }
     req.flash('success_msg', 'Image has been deleted successfully.');
     res.redirect('/admin/gallery');
@@ -996,6 +989,6 @@ module.exports = {
     getNotesPage, getAddNoteSubjectPage, postAddNoteSubject, getEditNoteSubjectPage, postAddNoteToSubject, deleteNoteFromSubject, deleteSubject,
     getDownloadsPage, getAddDownloadPage, postAddDownload, getEditDownloadPage, postUpdateDownload, deleteDownload,
     getGalleryPage, getAddGalleryImagePage, postAddGalleryImage, getEditGalleryImagePage, postUpdateGalleryImage, deleteGalleryImage,
-    getQuizPage, getEditQuizPage, postAddQuizQuestion, deleteQuizQuestion,
+    getQuizPage, getEditQuizPage, postAddQuizQuestion, deleteQuizQuestion, postBulkUploadQuiz,
     getFeedbackPage, deleteFeedback
 };
